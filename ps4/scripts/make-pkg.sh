@@ -33,17 +33,16 @@ AUTHINFO="000000000000000000000000001C004000FF0000000000800000000000000000000000
 sfo="$stage/sce_sys/param.sfo"
 P="$bin/PkgTool.Core"
 "$P" sfo_new "$sfo"
-"$P" sfo_setentry "$sfo" APP_TYPE  --type Integer --maxsize 4  --value 1
-"$P" sfo_setentry "$sfo" APP_VER   --type Utf8    --maxsize 8  --value "$ver"
-"$P" sfo_setentry "$sfo" ATTRIBUTE --type Integer --maxsize 18 --value 0
-"$P" sfo_setentry "$sfo" CATEGORY  --type Utf8    --maxsize 4  --value 'gde'
-"$P" sfo_setentry "$sfo" FORMAT    --type Utf8    --maxsize 4  --value 'obs'
-"$P" sfo_setentry "$sfo" CONTENT_ID --type Utf8   --maxsize 48 --value "$cid"
-"$P" sfo_setentry "$sfo" DOWNLOAD_DATA_SIZE --type Integer --maxsize 4 --value 0
-"$P" sfo_setentry "$sfo" SYSTEM_VER --type Integer --maxsize 4 --value 1020
-"$P" sfo_setentry "$sfo" TITLE     --type Utf8    --maxsize 128 --value "$title"
-"$P" sfo_setentry "$sfo" TITLE_ID  --type Utf8    --maxsize 12  --value "$tid"
-"$P" sfo_setentry "$sfo" VERSION   --type Utf8    --maxsize 8   --value "$ver"
+"$P" sfo_setentry "$sfo" APP_TYPE            --type Integer --maxsize 4   --value 1
+"$P" sfo_setentry "$sfo" APP_VER             --type Utf8    --maxsize 8   --value "$ver"
+"$P" sfo_setentry "$sfo" ATTRIBUTE           --type Integer --maxsize 4   --value 0
+"$P" sfo_setentry "$sfo" CATEGORY            --type Utf8    --maxsize 4   --value 'gd'
+"$P" sfo_setentry "$sfo" CONTENT_ID          --type Utf8    --maxsize 48  --value "$cid"
+"$P" sfo_setentry "$sfo" DOWNLOAD_DATA_SIZE  --type Integer --maxsize 4   --value 0
+"$P" sfo_setentry "$sfo" SYSTEM_VER          --type Integer --maxsize 4   --value 0
+"$P" sfo_setentry "$sfo" TITLE               --type Utf8    --maxsize 128 --value "$title"
+"$P" sfo_setentry "$sfo" TITLE_ID            --type Utf8    --maxsize 12  --value "$tid"
+"$P" sfo_setentry "$sfo" VERSION             --type Utf8    --maxsize 8   --value "$ver"
 
 if [ -n "$extra" ]; then cp -r "$extra"/. "$stage/"; fi
 

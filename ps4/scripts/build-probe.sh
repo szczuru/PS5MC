@@ -34,5 +34,5 @@ ls -la "$out/ps4mc-probe.elf"
 
 echo "==> paczka PKG..."
 "$here/make-pkg.sh" "$out/ps4mc-probe.elf" "$out" \
-  "PS4MC Probe" PS4MC0001 \
-  IV0000-PS4MC0001_00-PS4MCPROBE000000 1.00
+  "PS4MC Probe" PSMC00001 \
+  IV0000-PSMC00001_00-KODIPROBE0000000 01.00
