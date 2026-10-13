@@ -18,17 +18,15 @@ CXXFLAGS=(
 
 echo "==> patch libXcape relokacji..."
   python3 "$here/patch-xcape.py" "$XCAPE/lib/libXcape.a"
-  echo "==> kompilacja probe..."
-clang++ "${CXXFLAGS[@]}" -c "$root/probe/main.cpp"       -o "$out/probe.o"
-clang++ "${CXXFLAGS[@]}" -c "$root/src/PS4Privileges.cpp" -o "$out/priv.o"
+  echo "==> kompilacja probe v2 (minimal)..."
+clang++ "${CXXFLAGS[@]}" -c "$root/probe/main.cpp" -o "$out/probe.o"
 
 echo "==> linkowanie..."
 ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
-  -L"$tc/lib" -L"$XCAPE/lib" \
-  "$out/probe.o" "$out/priv.o" \
-  -lXcape -lc -lkernel -lc++ -lSceSysmodule \
+  -L"$tc/lib" \
+  "$out/probe.o" \
+  -lc -lkernel -lc++ -lSceSysmodule \
   -lSceUserService -lScePad -lSceAudioOut \
-  -lScePigletv2VSH -lScePrecompiledShaders \
   "$tc/lib/crt1.o" -o "$out/ps4mc-probe.elf"
 ls -la "$out/ps4mc-probe.elf"
 
