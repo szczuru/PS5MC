@@ -45,6 +45,9 @@ jobs:
           path: ~/OpenOrbis
           key: openorbis-v0.5.4-llvm18
 
+      - name: Uprawnienia skryptów
+        run: chmod +x ps4/scripts/*.sh
+
       - name: Pobierz toolchain
         run: bash ps4/scripts/00-fetch-toolchain.sh
 
@@ -84,6 +87,9 @@ jobs:
           key: openorbis-v0.5.4-llvm18
       - name: Pobierz toolchain
         run: bash ps4/scripts/00-fetch-toolchain.sh
+      - name: Uprawnienia skryptów
+        run: chmod +x ps4/scripts/*.sh
+
       - name: Buduj Kodi
         run: bash ps4/scripts/build-kodi.sh "$GITHUB_WORKSPACE/dist/kodi"
       - uses: actions/upload-artifact@v4
