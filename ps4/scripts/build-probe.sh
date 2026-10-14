@@ -8,24 +8,20 @@ source "$here/env.sh"
 root="$(cd "$here/.." && pwd)"   # ps4/
 out="${1:-$root/../dist/probe}"; mkdir -p "$out"; out="$(readlink -f "$out")"
 tc="$OO_PS4_TOOLCHAIN"
-XCAPE="$root/libXcape"
 
-CXXFLAGS=(
-  --target=x86_64-pc-freebsd12-elf -std=c++17 -D_GNU_SOURCE -fPIC -funwind-tables
-  -isysroot "$tc" -isystem "$tc/include" -isystem "$tc/include/c++/v1"
-  -I"$XCAPE/include" -I"$root/src"
+CFLAGS=(
+  --target=x86_64-pc-freebsd12-elf -std=c11 -D_GNU_SOURCE -fPIC -funwind-tables
+  -isysroot "$tc" -isystem "$tc/include"
 )
 
-echo "==> patch libXcape relokacji..."
-  python3 "$here/patch-xcape.py" "$XCAPE/lib/libXcape.a"
-  echo "==> kompilacja probe v2 (minimal)..."
-clang++ "${CXXFLAGS[@]}" -c "$root/probe/main.cpp" -o "$out/probe.o"
+echo "==> kompilacja probe v3 (pure C, bez C++)..."
+clang "${CFLAGS[@]}" -c "$root/probe/main.c" -o "$out/probe.o"
 
-echo "==> linkowanie..."
+echo "==> linkowanie (bez libc++)..."
 ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
   -L"$tc/lib" \
   "$out/probe.o" \
-  -lc -lkernel -lc++ -lSceSysmodule \
+  -lc -lkernel -lSceSysmodule \
   -lSceUserService -lScePad -lSceAudioOut \
   "$tc/lib/crt1.o" -o "$out/ps4mc-probe.elf"
 ls -la "$out/ps4mc-probe.elf"
