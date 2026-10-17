@@ -23,7 +23,7 @@ ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
   "$out/probe.o" \
   -lc -lkernel -lm \
   -lSceSysmodule -lSceUserService -lScePad \
-  -lSceAudioOut -lSceSystemService \
+  -lSceAudioOut -lSceSystemService -lSceVideoOut \
   -lScePigletv2VSH \
   "$tc/lib/crt1.o" -o "$out/ps4mc-probe.elf"
 ls -la "$out/ps4mc-probe.elf"
