@@ -1,7 +1,7 @@
 /* PS4MC Probe v4
    - poprawne wyjscie przez sceSystemServiceLoadExec("exit", NULL)
    - eskalacja uprawnien przez libXcape (jbc_jailbreak)
-   - po eskalacji: uid=0, dostep do /dev/cd0, /system
+   - po eskalacji: uid=0, dostep do /mnt/disc, /system
    - test padu i audio (1s ton)                                     */
 
 #include <stdlib.h>
@@ -71,7 +71,7 @@ static void probe_system(void)
     probe_stat("/data");
     probe_stat("/app0");
     probe_stat("/dev");
-    probe_stat("/dev/cd0");
+    probe_stat("/mnt/disc");
     probe_stat("/mnt/usb0");
     probe_stat("/system");
     probe_stat("/system/common/lib");
@@ -88,18 +88,18 @@ static void probe_escalate(void)
 
     if (r == 0) {
         /* Sprawdz co teraz widac */
-        probe_stat("/dev/cd0");
+        probe_stat("/mnt/disc");
         probe_stat("/mnt/usb0");
         probe_stat("/system");
         probe_stat("/system/common/lib");
 
-        /* Sprobuj zamontowac /dev/cd0 w sandboxie (wymaga plyt) */
-        int mr = jbc_mount_in_sandbox("/dev/cd0", "disc0");
-        ps4log("jbc_mount_in_sandbox(/dev/cd0 -> disc0): %d (0=ok)", mr);
+        /* Sprobuj zamontowac /mnt/disc w sandboxie (wymaga plyt) */
+        int mr = jbc_mount_in_sandbox("/mnt/disc", "disc");
+        ps4log("jbc_mount_in_sandbox(/mnt/disc -> disc): %d (0=ok)", mr);
         if (mr == 0) {
-            probe_stat("/mnt/sandbox/disc0");
+            probe_stat("/mnt/sandbox/disc");
             /* Odczyt sektora 16 plyt ISO (naped musi miec plyte) */
-            int fd = open("/mnt/sandbox/disc0", O_RDONLY);
+            int fd = open("/mnt/sandbox/disc", O_RDONLY);
             if (fd >= 0) {
                 unsigned char sec[2048];
                 off_t o = lseek(fd, (off_t)16 * 2048, SEEK_SET);
@@ -110,7 +110,7 @@ static void probe_escalate(void)
                 else
                     ps4log("odczyt sektora: %zd (%s)", n, strerror(errno));
                 close(fd);
-                jbc_unmount_in_sandbox("disc0");
+                jbc_unmount_in_sandbox("disc");
             } else {
                 ps4log("open /mnt/sandbox/disc0: %s", strerror(errno));
             }
