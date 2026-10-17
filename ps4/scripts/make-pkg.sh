@@ -27,7 +27,7 @@ cp "$icon" "$stage/sce_sys/icon0.png"
 # Same authinfo/paid values as OpenOrbis' own Piglet sample (title that loads
 # Sony system modules).
 "$bin/create-fself" -in="$elf" -out="$out/$(basename "$elf" .elf).oelf" \
-  --eboot "$stage/eboot.bin" --paid 0x3800000000000011
+  --eboot "$stage/eboot.bin" --paid 0x3800000000000035
 
 sfo="$stage/sce_sys/param.sfo"
 P="$bin/PkgTool.Core"
