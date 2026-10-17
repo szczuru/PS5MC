@@ -8,28 +8,23 @@ source "$here/env.sh"
 root="$(cd "$here/.." && pwd)"
 out="${1:-$root/../dist/probe}"; mkdir -p "$out"; out="$(readlink -f "$out")"
 tc="$OO_PS4_TOOLCHAIN"
-XCAPE="$root/libXcape"
-
-# Patch relokacji libXcape (R_PLT32_BND -> R_PLT32)
-python3 "$here/patch-xcape.py" "$XCAPE/lib/libXcape.a"
 
 CFLAGS=(
   --target=x86_64-pc-freebsd12-elf -std=c11 -D_GNU_SOURCE -fPIC -funwind-tables
   -isysroot "$tc" -isystem "$tc/include"
-  -I"$XCAPE/include"
 )
 
-echo "==> kompilacja probe v4..."
+echo "==> kompilacja probe v5..."
 clang "${CFLAGS[@]}" -c "$root/probe/main.c" -o "$out/probe.o"
 
 echo "==> linkowanie..."
 ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
-  -L"$tc/lib" -L"$XCAPE/lib" \
+  -L"$tc/lib" \
   "$out/probe.o" \
-  --whole-archive "$XCAPE/lib/libXcape.a" --no-whole-archive \
   -lc -lkernel -lm \
   -lSceSysmodule -lSceUserService -lScePad \
   -lSceAudioOut -lSceSystemService \
+  -lScePigletv2VSH \
   "$tc/lib/crt1.o" -o "$out/ps4mc-probe.elf"
 ls -la "$out/ps4mc-probe.elf"
 
