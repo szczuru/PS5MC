@@ -99,12 +99,12 @@ static void open_video_out(void)
     ps4log("== VideoOut ==");
     int32_t user=0; sceUserServiceGetInitialUser(&user);
     /* BUS_TYPE_MAIN=0, index=0 */
-    g_voHandle=sceVideoOutOpen(user,0,0,NULL);
-    ps4log("  sceVideoOutOpen(user=%d): %d",user,g_voHandle);
+    /* Na PS4 VideoOut wymaga user=0xFF (system) aby zwrocil maly handle */
+    g_voHandle=sceVideoOutOpen(0xFF,0,0,NULL);
+    ps4log("  sceVideoOutOpen(0xFF): %d (0x%x)",g_voHandle,g_voHandle);
     if(g_voHandle<0){
-        /* Fallback: user=0xFF (system) */
-        g_voHandle=sceVideoOutOpen(0xFF,0,0,NULL);
-        ps4log("  sceVideoOutOpen(user=0xFF): %d",g_voHandle);
+        g_voHandle=sceVideoOutOpen(user,0,0,NULL);
+        ps4log("  sceVideoOutOpen(user=%d): %d (0x%x)",user,g_voHandle,g_voHandle);
     }
 }
 
@@ -118,10 +118,18 @@ static int try_egl(const char *label, OrbisPglConfig *cfg)
     }
     ps4log("  scePigletSetConfigurationVSH: OK");
 
-    EGLDisplay dpy=eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    ps4log("  eglGetDisplay: %p",(void*)dpy);
+    /* PS4 Piglet: eglGetDisplay potrzebuje VideoOut handle, nie EGL_DEFAULT_DISPLAY.
+       eglGetDisplay przyjmuje EGLNativeDisplayType=int, wiec rzutujemy przez int. */
+    typedef EGLDisplay (*pfnGetDisplay)(int);
+    pfnGetDisplay fnGetDisp=(pfnGetDisplay)(void*)eglGetDisplay;
+    EGLDisplay dpy=EGL_NO_DISPLAY;
+    int displays[]={g_voHandle,1,2,3,0};
+    for(int di=0;di<5&&dpy==EGL_NO_DISPLAY;di++){
+        dpy=fnGetDisp(displays[di]);
+        ps4log("  eglGetDisplay(%d): %p",displays[di],(void*)dpy);
+    }
     if(dpy==EGL_NO_DISPLAY){
-        ps4log("  eglGetDisplay: NO_DISPLAY (err 0x%x)",eglGetError());
+        ps4log("  wszystkie getDisplay: NO_DISPLAY (err 0x%x)",eglGetError());
         return 0;
     }
     EGLint maj=0,mn=0;
