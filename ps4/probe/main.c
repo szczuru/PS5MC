@@ -248,7 +248,7 @@ static void probe_audio(void)
     ps4log("== audio (PERSONAL) ==");
     sceAudioOutInit();
     int32_t user=0; sceUserServiceGetInitialUser(&user);
-    int h=sceAudioOutOpen(user,5 /*PERSONAL*/,0,512,48000,
+    int h=sceAudioOutOpen(user,2 /*PERSONAL - potwierdzone w v7 logu*/,0,512,48000,
                           ORBIS_AUDIO_OUT_PARAM_FORMAT_S16_STEREO);
     ps4log("  open: 0x%x",h);
     if(h<0) return;
