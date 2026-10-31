@@ -24,11 +24,12 @@ cp "$sample/sce_sys/about/right.sprx" "$stage/sce_sys/about/right.sprx"
 cp "$sample/sce_module/libc.prx" "$sample/sce_module/libSceFios2.prx" "$stage/sce_module/"
 cp "$icon" "$stage/sce_sys/icon0.png"
 
-AUTHINFO="000000000000000000000000001C004000FF000000000080000000000000000000000000000000000000008000400040000000000000008000000000000000080040FFFF000000F000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-# Same authinfo/paid values as OpenOrbis' own Piglet sample (title that loads
+# NOTE: --authinfo powoduje crash CE-34878-0 na PS4 FW 9.00 + GoldHEN.
+# PAID 0x3800000000000035 (SceVideoServicePlayer) bez authinfo dziala stabilnie.
+# Same paid values as OpenOrbis' own Piglet sample (title that loads
 # Sony system modules).
 "$bin/create-fself" -in="$elf" -out="$out/$(basename "$elf" .elf).oelf" \
-  --eboot "$stage/eboot.bin" --paid 0x3800000000000035 --authinfo "$AUTHINFO"
+  --eboot "$stage/eboot.bin" --paid 0x3800000000000035
 
 sfo="$stage/sce_sys/param.sfo"
 P="$bin/PkgTool.Core"
