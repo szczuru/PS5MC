@@ -9,12 +9,12 @@
 - GitHub Actions (`.github/workflows/ps4-build.yml`)
 - Biblioteka uprawnień libXcape (`jbc_jailbreak`, `jbc_mount_in_sandbox`)
 
-### ✅ M1 – Program testowy (probe) (gotowe)
-- Plik: `ps4/probe/main.cpp`
-- Sprawdza na konsoli: uid/root, dostęp do `/dev/cd0`, moduły dekoderów,
-  GLES Piglet (wersja, rozszerzenia, kompilacja GLSL, benchmark YUV 1080p),
-  pad DS4, audio wyjście
-- **Wynik M1 = log z konsoli**, który rozstrzyga wybór ścieżki grafiki i dekodera.
+### ✅ M1 – Program testowy (probe) (v12 – w trakcie diagnostyki)
+- Plik: `ps4/probe/main.c` (v12)
+- Sprawdza: VideoOut (kilka formatów/tilingów, 720p→1080p), audio, pad, Piglet/GLSL
+- VideoOut testowany **najpierw** (dłuższe czasy, FLIP_VSYNC)
+- Znany problem: dźwięk działa, obraz czarny → zbieramy log
+- **Wynik M1 = log z konsoli** (`/data/ps4mc/probe.log`), który rozstrzyga ścieżkę grafiki
 
 ### 🔲 M2 – Szkielet platformy PS4 w Kodi
 Pliki do stworzenia w `xbmc/platform/ps4/` i `cmake/platform/ps4/`:

@@ -1,68 +1,60 @@
-# PS4MC – Kodi na PS4: instrukcja krok po kroku
+# PS4MC – Kodi na PS4: instrukcja + probe v12
 
-Wszystko robisz w przeglądarce, na GitHubie. Nie musisz niczego instalować na komputerze
-(poza ewentualnie programem do FTP).
+## Co masz w tym folderze
 
-## Część 1 – fork i gałąź
+- `probe/` – program testowy (v12) – sprawdza VideoOut, audio, pad, Piglet
+- `scripts/` – budowanie PKG przez OpenOrbis
+- `toolchain/ps4-kodi.cmake` – plik CMake do późniejszego pełnego buildu Kodi
+- `src/PS4Privileges.*` – eskalacja uprawnień (libXcape / jbc)
+- `docs/PLAN.md` – plan etapów portu
+- `title/sce_sys/icon0.png` – ikona
 
-1. Wejdź na https://github.com/VivaLaVent/PS5MC i kliknij **Fork** (prawy górny róg),
-   potem **Create fork**.
-2. W swoim forku kliknij listę gałęzi (napis `ps5mc-pier` lub `master` w lewym górnym rogu
-   listy plików). Wpisz w polu wyszukiwania `ps5mc-piers`, wybierz ją.
-3. Kliknij znowu listę gałęzi, wpisz `ps4-kodi-piers` i kliknij
-   **Create branch ps4-kodi-piers from ps5mc-piers**.
-4. Ustaw ją jako domyślną: **Settings → Branches → Default branch → ikona strzałek →
-   `ps4-kodi-piers` → Update**. (Bez tego przycisk „Run workflow” nie pokaże się w Actions.)
-5. Zakładka **Actions** → kliknij **I understand my workflows, go ahead and enable them**.
+## Problem: czarny ekran (dźwięk działa)
 
-## Część 2 – wgranie tego pakietu
+Probe v12 jest specjalnie przygotowany pod ten przypadek:
 
-1. Rozpakuj ZIP na komputerze.
-2. W forku, na gałęzi `ps4-kodi-piers`: **Add file → Upload files**.
-3. Przeciągnij do okna **zawartość** rozpakowanego folderu: foldery `.github` i `ps4`
-   oraz plik `START-TUTAJ.md`. (Foldery zaczynające się od kropki bywają ukryte –
-   włącz „pokaż ukryte pliki” w eksploratorze.)
-4. Na dole: wybierz **Commit directly to the ps4-kodi-piers branch** → **Commit changes**.
+1. **VideoOut jest testowany NAJPIERW** (Piglet na końcu – wcześniej mógł zabierać display).
+2. Najpierw 720p linear A8B8G8R8, potem 1080p, potem inne formaty.
+3. Dłuższe czasy (biały ~5 s, gradient ~8 s, kolory solidne).
+4. `FLIP_VSYNC` + czekanie na `sceVideoOutIsFlipPending`.
+5. Pełne logowanie każdego kodu powrotu.
 
-Commit w folderze `ps4/` uruchamia budowanie automatycznie.
+### Co powinieneś zobaczyć (jeśli grafika działa)
 
-## Część 3 – pobranie programu testowego
+1. ~5 sekund **pełnego białego ekranu**
+2. ~8 sekund gradientu czerwony → niebieski z białym prostokątem na środku
+3. Po kolei: czerwony / zielony / niebieski / żółty (po ~2 s)
+4. Potem dźwięk 440 Hz (~1 s)
+5. Krótki test pada (możesz klikać)
+6. Na końcu próba Piglet (animacja koloru)
 
-1. Zakładka **Actions** → wpis **PS4 build** (żółta kropka = trwa, zielony haczyk = gotowe,
-   zwykle kilka minut).
-2. Kliknij w ukończone uruchomienie → na dole **Artifacts** → `ps4mc-probe-pkg` (ZIP z plikiem
-   `IV0000-PS4MC0001_00-PS4MCPROBE000000.pkg`).
-3. Jeśli coś się wysypało (czerwony krzyżyk): wejdź w uruchomienie, kliknij nieudany krok
-   i wklej mi ostatnie ~30 linii logu. Poprawię.
+Jeśli nadal czarny ekran – **to normalne na tym etapie**. Najważniejszy jest log.
 
-## Część 4 – instalacja na PS4
+## Budowanie przez GitHub Actions
 
-Potrzebujesz PS4 po jailbreaku z GoldHEN (lub innym HEN z instalacją pakietów).
+1. Wgraj zmiany (folder `ps4/` + `.github/workflows/ps4-build.yml`) na gałąź `ps4-kodi-piers`.
+2. Zakładka **Actions** → **PS4 build**.
+3. Po sukcesie pobierz artifact **ps4mc-probe-pkg**.
+4. Zainstaluj `.pkg` na PS4 (GoldHEN → Package Installer lub FTP do `/data/pkg/`).
 
-1. Skopiuj plik `.pkg` na konsolę przez FTP (GoldHEN uruchamia serwer FTP na porcie 2121)
-   do katalogu `/data/pkg/` – albo na pendrive exFAT/FAT32.
-2. Na PS4: **Ustawienia → Debug Settings → Game → Package Installer** (nazwa i położenie
-   zależą od wersji HEN) i zainstaluj pakiet.
-3. Uruchom aplikację **PS4MC Probe** z ekranu głównego. Pierwsze ~minuty:
-   - ok. 8 s możesz naciskać przyciski pada (są logowane),
-   - usłyszysz 2 s dźwięku,
-   - zobaczysz kolorową animację na ekranie (to test grafiki Piglet).
-   Włóż płytę z filmem do napędu przed startem, jeśli chcesz sprawdzić odczyt płyty.
-4. Po zakończeniu pobierz log przez FTP: `/data/ps4mc/probe.log`
-   (awaryjnie `/mnt/usb0/ps4mc-probe.log`). **Wklej mi całą zawartość** – na jego podstawie
-   dobiorę ścieżkę grafiki i dekodera.
+## Po uruchomieniu probe
 
-Jeśli aplikacja zawiesi się lub wróci do ekranu głównego bez logu, napisz, w którym
-momencie (obraz? dźwięk?). To też jest informacja.
+1. Poczekaj aż aplikacja sama wyjdzie (albo naciśnij PS).
+2. Pobierz log przez FTP:
+   - `/data/ps4mc/probe.log` (główny)
+   - awaryjnie `/mnt/usb0/ps4mc-probe.log`
+3. **Wklej całą zawartość logu** – na jego podstawie dobiorę dalszą ścieżkę (format, tiling, pamięć GPU, Piglet).
 
-## Co dalej
+## Co dalej (po udanym logu)
 
-Patrz `ps4/docs/PLAN.md`.
+Patrz `docs/PLAN.md`:
 
-## Licencje i źródła
+- **M2** – szkielet platformy PS4 w Kodi (`xbmc/platform/ps4/`)
+- **M3** – zależności (FFmpeg, Python…)
+- **M4** – pełny build Kodi + odblokowanie joba `kodi` w Actions
 
-- Kodi: GPL-2.0-or-later (ten sam fork).
-- Toolchain: OpenOrbis PS4 Toolchain (pobierany podczas budowania, nie jest częścią repo).
-- Pliki `right.sprx`, `libc.prx`, `libSceFios2.prx` do paczki są pobierane z repozytorium
-  OpenOrbis w czasie budowania.
-- Repo nie zawiera kodu ani bibliotek Sony.
+## Licencje
+
+- Kodi: GPL-2.0-or-later
+- Toolchain: OpenOrbis (pobierany w czasie budowania)
+- Repo nie zawiera kodu ani bibliotek Sony

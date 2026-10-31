@@ -14,7 +14,7 @@ CFLAGS=(
   -isysroot "$tc" -isystem "$tc/include"
 )
 
-echo "==> kompilacja probe v5..."
+echo "==> kompilacja probe v12..."
 clang "${CFLAGS[@]}" -c "$root/probe/main.c" -o "$out/probe.o"
 
 echo "==> linkowanie..."
