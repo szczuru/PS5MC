@@ -1,19 +1,9 @@
 #!/usr/bin/env bash
-# Turn a linked ELF into an installable fake-PKG (for GoldHEN / "Homebrew
-# Enabler" package install).
-#
-#   make-pkg.sh <elf> <out-dir> <TITLE> <TITLE_ID> <CONTENT_ID> <VERSION> [extra-dir]
-#
-# TITLE_ID   : 9 chars, e.g. PS4MC0001
-# CONTENT_ID : 36 chars, e.g. IV0000-PS4MC0001_00-KODIPS4000000000
-# extra-dir  : optional folder copied into the package next to eboot.bin
-#              (Kodi's share/, addons/, ...). Becomes /app0/ on the console.
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$here/env.sh"
 
-elf="$(readlink -f "$1")"; out="$(readlink -f "${2}")"; title="$3"; tid="$4"; cid="$5"; ver="$6"
-extra="${7:-}"
+elf="$(readlink -f "$1")"; out="$(readlink -f "$2")"; title="$3"; tid="$4"; cid="$5"; ver="$6"
 tc="$OO_PS4_TOOLCHAIN"; bin="$tc/bin/linux"
 sample="$OO_PS4_SAMPLES/samples/piglet"
 icon="$here/../title/sce_sys/icon0.png"
@@ -25,9 +15,7 @@ cp "$sample/sce_module/libc.prx" "$sample/sce_module/libSceFios2.prx" "$stage/sc
 cp "$icon" "$stage/sce_sys/icon0.png"
 
 # NOTE: --authinfo powoduje crash CE-34878-0 na PS4 FW 9.00 + GoldHEN.
-# PAID 0x3800000000000035 (SceVideoServicePlayer) bez authinfo dziala stabilnie.
-# Same paid values as OpenOrbis' own Piglet sample (title that loads
-# Sony system modules).
+# PAID 0x3800000000000035 bez authinfo dziala stabilnie.
 "$bin/create-fself" -in="$elf" -out="$out/$(basename "$elf" .elf).oelf" \
   --eboot "$stage/eboot.bin" --paid 0x3800000000000035
 
@@ -45,11 +33,8 @@ P="$bin/PkgTool.Core"
 "$P" sfo_setentry "$sfo" TITLE_ID            --type Utf8    --maxsize 12  --value "$tid"
 "$P" sfo_setentry "$sfo" VERSION             --type Utf8    --maxsize 8   --value "$ver"
 
-if [ -n "$extra" ]; then cp -r "$extra"/. "$stage/"; fi
-
 ( cd "$stage"
-  # file paths in a gp4 are relative to the gp4's own folder, so it lives in $stage
-  files="$(find . -type f ! -name pkg.gp4 | sed 's#^\./##' | sort | tr '\n' ' ')"
+  files="$(find . -type f ! -name pkg.gp4 | sed 's#^./##' | sort | tr '\n' ' ')"
   "$bin/create-gp4" -out "$stage/pkg.gp4" --content-id="$cid" --files "$files"
   "$P" pkg_build "$stage/pkg.gp4" "$out" )
 ls -la "$out"/*.pkg
