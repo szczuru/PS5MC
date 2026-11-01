@@ -33,7 +33,8 @@ cd "$SRC"
   --disable-smtp --disable-gopher --disable-mqtt \
   --without-libpsl --without-brotli --without-zstd --without-libidn2 \
   CPPFLAGS="-I$PS4_PREFIX/include" \
-  LDFLAGS="-L$PS4_PREFIX/lib"
+  LDFLAGS="-nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x --sysroot=$OO_PS4_TOOLCHAIN -L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib" \
+  LIBS="-lc -lkernel -lSceSysmodule $OO_PS4_TOOLCHAIN/lib/crt1.o"
 make -j"$(nproc)"
 make install
 echo "curl OK"
