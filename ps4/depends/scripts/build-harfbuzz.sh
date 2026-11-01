@@ -49,7 +49,23 @@ EOF
 
 export PKG_CONFIG_PATH="$PS4_PREFIX/lib/pkgconfig"
 export PKG_CONFIG_LIBDIR="$PS4_PREFIX/lib/pkgconfig"
-export PKG_CONFIG_SYSROOT_DIR="$OO_PS4_TOOLCHAIN"
+
+# The PS4 FreeType CMake build installs the archive and headers but no .pc file.
+# Meson uses pkg-config to locate this target dependency.
+if [ ! -f "$PS4_PREFIX/lib/pkgconfig/freetype2.pc" ]; then
+  cat > "$PS4_PREFIX/lib/pkgconfig/freetype2.pc" <<EOF
+prefix=$PS4_PREFIX
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib
+includedir=\${prefix}/include/freetype2
+
+Name: FreeType
+Description: FreeType font rendering library
+Version: 2.13.2
+Libs: -L\${libdir} -lfreetype -lz
+Cflags: -I\${includedir} -I\${prefix}/include
+EOF
+fi
 
 rm -rf "$BUILD"
 meson setup "$BUILD" "$SRC" \
