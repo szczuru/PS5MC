@@ -25,7 +25,7 @@ fi
 
 cd "$SRC"
 if ! ./configure --host="$HOST" --prefix="$PS4_PREFIX" \
-  --enable-static --disable-shared --disable-tool \\
+  --enable-static --disable-shared \
   --with-zlib="$PS4_PREFIX" \
   --with-openssl="$PS4_PREFIX" \
   --disable-ldap --disable-rtsp --disable-dict --disable-telnet \
@@ -39,6 +39,12 @@ if ! ./configure --host="$HOST" --prefix="$PS4_PREFIX" \
   grep -n -B 6 -A 8 -E 'gethostbyname|error:|undefined reference' config.log | tail -120 || tail -120 config.log
   exit 1
 fi
-make -j"$(nproc)"
-make install
-echo "curl OK"
+
+# The command-line curl executable needs a complete process runtime. PS4MC
+# only consumes libcurl, so build and install that target without linking curl.
+make -C lib -j"$(nproc)"
+make -C lib install
+install -d "$PS4_PREFIX/include/curl" "$PS4_PREFIX/lib/pkgconfig"
+install -m 644 include/curl/*.h "$PS4_PREFIX/include/curl/"
+install -m 644 libcurl.pc "$PS4_PREFIX/lib/pkgconfig/"
+echo "curl library OK"
