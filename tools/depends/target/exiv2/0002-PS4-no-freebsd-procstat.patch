@@ -14,7 +14,7 @@ diff --git a/src/futils.cpp b/src/futils.cpp
 diff --git a/src/version.cpp b/src/version.cpp
 --- a/src/version.cpp
 +++ b/src/version.cpp
-@@ -48,7 +48,7 @@
+@@ -48,6 +48,6 @@
  #elif defined(__APPLE__)
  #include <mach-o/dyld.h>
 -#elif defined(__FreeBSD__)
@@ -22,7 +22,7 @@ diff --git a/src/version.cpp b/src/version.cpp
  // clang-format off
  #include <sys/param.h>
  #include <sys/queue.h>
-@@ -144,7 +144,7 @@ static std::vector<std::string> getLoadedLibraries() {
+@@ -144,8 +144,8 @@ static std::vector<std::string> getLoadedLibraries() {
      std::string path(_dyld_get_image_name(image));
      pushPath(path, libs, paths);
    }
