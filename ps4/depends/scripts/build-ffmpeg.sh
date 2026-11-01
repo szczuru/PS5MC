@@ -27,6 +27,29 @@ fi
 
 cd "$SRC"
 
+# The OpenOrbis sysroot identifies as FreeBSD, but does not provide sysctl.
+# Keep FFmpeg's sysconf CPU count path available on PS4.
+python3 - "$SRC/libavutil/cpu.c" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+source = path.read_text()
+replacements = (
+    ("#if HAVE_SYSCTL\n", "#if HAVE_SYSCTL && !defined(__PS4__)\n"),
+    ("#elif HAVE_SYSCTL && defined(HW_NCPUONLINE)",
+     "#elif HAVE_SYSCTL && !defined(__PS4__) && defined(HW_NCPUONLINE)"),
+    ("#elif HAVE_SYSCTL && defined(HW_NCPU)",
+     "#elif HAVE_SYSCTL && !defined(__PS4__) && defined(HW_NCPU)"),
+)
+for original, patched in replacements:
+    if original in source:
+        source = source.replace(original, patched, 1)
+    elif patched not in source:
+        raise SystemExit(f"Could not find expected FFmpeg source line: {original}")
+path.write_text(source)
+PY
+
 if ! ./configure \
   --prefix="$PS4_PREFIX" \
   --target-os=freebsd \
