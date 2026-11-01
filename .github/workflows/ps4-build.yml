@@ -103,6 +103,8 @@ jobs:
         with:
           path: ps4/depends/prefix
           key: ps4-depends-${{ hashFiles('ps4/depends/scripts/*.sh') }}
+          restore-keys: |
+            ps4-depends-
 
       - name: Uprawnienia skryptów
         run: |
@@ -153,6 +155,8 @@ jobs:
         with:
           path: ps4/depends/prefix
           key: ps4-depends-${{ hashFiles('ps4/depends/scripts/*.sh') }}
+          restore-keys: |
+            ps4-depends-
       - name: Pobierz toolchain
         run: bash ps4/scripts/00-fetch-toolchain.sh
       - name: Uprawnienia skryptów
