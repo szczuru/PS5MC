@@ -163,6 +163,7 @@ macro(buildFFMPEG)
 
     set(LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
     list(APPEND LINKER_FLAGS ${SYSTEM_LDFLAGS})
+    list(JOIN LINKER_FLAGS " " LINKER_FLAGS)
 
     # Some list shenanigans not being passed through without stringify/listify
     # externalproject_add allows declaring list separator to generate a list for the target
@@ -187,7 +188,7 @@ macro(buildFFMPEG)
                    -DENABLE_CCACHE=${ENABLE_CCACHE}
                    -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
                    -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-                   -DCMAKE_EXE_LINKER_FLAGS=${LINKER_FLAGS}
+                   "-DCMAKE_EXE_LINKER_FLAGS=${LINKER_FLAGS}"
                    -DDISABLE_FFMPEG_SOURCE_PLUGINS=${DISABLE_FFMPEG_SOURCE_PLUGINS}
                    -DEXTRA_ENV_VARS=${extra_env_vars}
                    ${CROSS_ARGS}
