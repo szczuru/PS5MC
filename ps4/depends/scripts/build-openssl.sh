@@ -28,11 +28,15 @@ fi
 
 cd "$SRC"
 
-# Put cross flags into CC so Configure does not see them as targets
 CROSS_CC="$CC -target x86_64-pc-freebsd12-elf --sysroot=$OO_PS4_TOOLCHAIN -nostdinc ${INC_FLAGS_STR:-}"
 
+# Disable features that break on PS4/OpenOrbis headers and are unused by Kodi:
+# - sock / dgram / dtls (bss_dgram IPv6 struct mismatch)
+# - asm, shared, engines, tests
 ./Configure BSD-generic64 \
   no-shared no-dso no-async no-tests no-ui-console no-asm \
+  no-sock no-dgram no-dtls no-dtls1 no-dtls1_2 \
+  no-stdio no-afalgeng \
   --prefix="$PS4_PREFIX" \
   --openssldir="$PS4_PREFIX/ssl" \
   -D__PS4__ -D__ORBIS__ \
