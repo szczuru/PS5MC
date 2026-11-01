@@ -28,7 +28,7 @@ c = ['$CC']
 cpp = ['$CXX']
 ar = ['$AR']
 strip = ['$STRIP']
-pkgconfig = ['pkg-config']
+pkg-config = ['pkg-config']
 
 [properties]
 needs_exe_wrapper = true
@@ -51,8 +51,7 @@ export PKG_CONFIG_LIBDIR="$PS4_PREFIX/lib/pkgconfig"
 
 # The PS4 FreeType CMake build installs the archive and headers but no .pc file.
 # Meson uses pkg-config to locate this target dependency.
-if [ ! -f "$PS4_PREFIX/lib/pkgconfig/freetype2.pc" ]; then
-  cat > "$PS4_PREFIX/lib/pkgconfig/freetype2.pc" <<EOF
+cat > "$PS4_PREFIX/lib/pkgconfig/freetype2.pc" <<EOF
 prefix=$PS4_PREFIX
 exec_prefix=\${prefix}
 libdir=\${prefix}/lib
@@ -64,10 +63,14 @@ Version: 2.13.2
 Libs: -L\${libdir} -lfreetype -lz
 Cflags: -I\${includedir} -I\${prefix}/include
 EOF
-fi
+
+echo "=== target FreeType pkg-config ==="
+cat "$PS4_PREFIX/lib/pkgconfig/freetype2.pc"
+pkg-config --modversion freetype2
+pkg-config --cflags --libs freetype2
 
 rm -rf "$BUILD"
-meson setup "$BUILD" "$SRC" \
+if ! meson setup "$BUILD" "$SRC" \
   --cross-file "$MESON_CROSS" \
   --prefix "$PS4_PREFIX" \
   --libdir lib \
@@ -84,7 +87,12 @@ meson setup "$BUILD" "$SRC" \
   -Dintrospection=disabled \
   -Dutilities=disabled \
   -Dgpu=disabled \
-  -Dgraphite2=disabled
+  -Dgraphite2=disabled \
+  -Dpkg_config_path="$PS4_PREFIX/lib/pkgconfig"; then
+  echo "=== Meson configuration log ==="
+  cat "$BUILD/meson-logs/meson-log.txt" || true
+  exit 1
+fi
 ninja -C "$BUILD"
 ninja -C "$BUILD" install
 echo "harfbuzz OK -> $PS4_PREFIX/lib/libharfbuzz.a"
