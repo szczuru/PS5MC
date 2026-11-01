@@ -22,6 +22,22 @@ if [ ! -d "$SRC" ]; then
   tar xf "$TARBALL"
 fi
 
+# HarfBuzz 14.2.0 mistakenly asks for FreeType >= 12.0.6; the intended
+# minimum is 2.12.0. The PS4 dependency build provides FreeType 2.13.2.
+python3 - "$SRC/meson.build" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+source = path.read_text()
+wrong = "freetype_min_version = '>= 12.0.6'"
+fixed = "freetype_min_version = '>= 2.12.0'"
+if wrong in source:
+    path.write_text(source.replace(wrong, fixed, 1))
+elif fixed not in source:
+    raise SystemExit("Unexpected HarfBuzz FreeType version requirement")
+PY
+
 cat > "$MESON_CROSS" <<EOF
 [binaries]
 c = ['$CC']
