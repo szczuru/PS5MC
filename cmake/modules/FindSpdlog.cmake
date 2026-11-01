@@ -12,6 +12,12 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
   macro(buildmacroSpdlog)
   
     find_package(Fmt REQUIRED ${SEARCH_QUIET})
+
+    if(CORE_SYSTEM_NAME STREQUAL "ps4")
+      set(patches "${CMAKE_SOURCE_DIR}/tools/depends/target/spdlog/0001-PS4-thread-id-fallback.patch")
+      generate_patchcommand("${patches}")
+      unset(patches)
+    endif()
   
     if(APPLE)
       set(EXTRA_ARGS "-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}")
