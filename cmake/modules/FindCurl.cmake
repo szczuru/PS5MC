@@ -35,6 +35,9 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
     elseif(CORE_SYSTEM_NAME STREQUAL "ps4")
       # OpenOrbis exposes the socket option as IPPROTO_IP, not SOL_IP.
       set(${CMAKE_FIND_PACKAGE_NAME}_C_FLAGS "${CMAKE_C_FLAGS} -DSOL_IP=IPPROTO_IP")
+      set(PATCH_COMMAND ${CMAKE_COMMAND} -E env python3
+                        ${CMAKE_SOURCE_DIR}/ps4/scripts/patch-curl-if2ip.py
+                        <SOURCE_DIR>/lib/if2ip.c)
     endif()
 
     set(CMAKE_ARGS -DBUILD_CURL_EXE=OFF

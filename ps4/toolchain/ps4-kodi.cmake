@@ -40,12 +40,11 @@ set(PS4_PREFIX "${OO_PS4_TOOLCHAIN}/ps4mc-prefix" CACHE PATH "install prefix of 
 
 set(_ps4_common "-fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_PREFIX}/include")
 set(CMAKE_C_FLAGS_INIT   "${_ps4_common}")
-# Kodi uses C++20 ranges and constexpr library support. The OpenOrbis release
-# still ships libc++ 11 headers, so CI provides LLVM 18 headers while retaining
-# the OpenOrbis libc++ runtime (ABI version 1).
-set(PS4_LIBCXX_INCLUDE_DIR "${OO_PS4_TOOLCHAIN}/include/c++/v1")
-if(EXISTS "/usr/lib/llvm-18/include/c++/v1/ranges")
-  set(PS4_LIBCXX_INCLUDE_DIR "/usr/lib/llvm-18/include/c++/v1")
+# Kodi uses C++20 ranges. build-kodi.sh stages LLVM 18's libc++ headers under
+# PS4_PREFIX and applies the two compatibility shims needed by OpenOrbis libc.
+set(PS4_LIBCXX_INCLUDE_DIR "${PS4_PREFIX}/include/c++/v1")
+if(NOT EXISTS "${PS4_LIBCXX_INCLUDE_DIR}/ranges")
+  set(PS4_LIBCXX_INCLUDE_DIR "${OO_PS4_TOOLCHAIN}/include/c++/v1")
 endif()
 set(CMAKE_CXX_FLAGS_INIT "-isystem ${PS4_LIBCXX_INCLUDE_DIR} ${_ps4_common} -D_LIBCPP_HAS_MUSL_LIBC -D_LIBCPP_HAS_NO_VENDOR_AVAILABILITY_ANNOTATIONS -D_LIBCPP_DISABLE_AVAILABILITY -fexceptions -fcxx-exceptions")
 # Prefer toolchain libc includes before host ones when using host libc++ headers.

@@ -6,6 +6,36 @@ root="$(cd "$here/../.." && pwd)"
 source "$here/env.sh"
 
 prefix="$root/ps4/depends/prefix"
+
+# Stage current libc++ headers for Kodi's C++20 code. LLVM 18 assumes a newer
+# FreeBSD libm and xlocale.h than the OpenOrbis sysroot provides, so adapt the
+# headers in the target prefix while leaving the host installation untouched.
+host_libcxx="/usr/lib/llvm-18/include/c++/v1"
+if [ -f "$host_libcxx/ranges" ]; then
+  for target_prefix in "$prefix" "$OO_PS4_TOOLCHAIN/ps4mc-prefix"; do
+    target_libcxx="$target_prefix/include/c++/v1"
+    mkdir -p "$target_libcxx"
+    cp -a "$host_libcxx/." "$target_libcxx/"
+    python3 - "$target_libcxx/math.h" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+source = path.read_text()
+for name in ("isinf", "isnan"):
+    declaration = f"using std::__math::{name};"
+    marker = f"// Provided by OpenOrbis math.h: {name}."
+    if declaration not in source and marker in source:
+        continue
+    if declaration not in source:
+        raise SystemExit(f"Expected libc++ math declaration not found: {declaration}")
+    source = source.replace(declaration, marker, 1)
+path.write_text(source)
+PY
+    install -m 0644 "$root/ps4/toolchain/compat/xlocale.h" "$target_prefix/include/xlocale.h"
+  done
+fi
+
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
 export PKG_CONFIG_LIBDIR="$prefix/lib/pkgconfig"
 export PKG_CONFIG_SYSROOT_DIR=""
@@ -66,7 +96,6 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DENABLE_INTERNAL_BLURAY=OFF \
   -DENABLE_AIRTUNES=OFF \
   -DENABLE_UPNP=OFF \
-  -DENABLE_MARIADBCLIENT=OFF \
   -DENABLE_MYSQLCLIENT=OFF \
   -DENABLE_MICROHTTPD=OFF \
   -DOPENSSL_ROOT_DIR="$prefix" \
@@ -74,6 +103,7 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DOPENSSL_CRYPTO_LIBRARY="$prefix/lib/libcrypto.a" \
   -DOPENSSL_SSL_LIBRARY="$prefix/lib/libssl.a" \
   -DENABLE_INTERNAL_FFMPEG=ON \
+  -DENABLE_MARIADBCLIENT=OFF \
   -DENABLE_INTERNAL_DAV1D=OFF \
   -DENABLE_INTERNAL_FSTRCMP=ON \
   -DENABLE_INTERNAL_TINYXML2=ON \
