@@ -27,10 +27,11 @@ fi
 
 cd "$SRC"
 
-./configure \
+if ! ./configure \
   --prefix="$PS4_PREFIX" \
   --target-os=freebsd \
   --arch=x86_64 \
+  --enable-cross-compile \
   --cc="$CC" \
   --cxx="$CXX" \
   --ar="$AR" \
@@ -45,8 +46,13 @@ cd "$SRC"
   --disable-x86asm --disable-inline-asm \
   --disable-network \
   --extra-cflags="$CFLAGS -I$PS4_PREFIX/include" \
-  --extra-ldflags="$LDFLAGS -L$PS4_PREFIX/lib" \
-  --pkg-config-flags="--static"
+  --extra-ldflags="$LDFLAGS -nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x --sysroot=$OO_PS4_TOOLCHAIN -L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib" \
+  --extra-libs="-lc -lkernel -lSceSysmodule $OO_PS4_TOOLCHAIN/lib/crt1.o" \
+  --pkg-config-flags="--static"; then
+  echo "FFmpeg configure failed; diagnostics from ffbuild/config.log:"
+  tail -160 ffbuild/config.log
+  exit 1
+fi
 
 make -j"$(nproc)"
 make install
