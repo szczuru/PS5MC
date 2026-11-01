@@ -73,7 +73,9 @@ if ! printf '%s  %s\n' "$flatbuffers_sha512" "$flatbuffers_cache" | sha512sum --
   mv "$flatbuffers_tmp" "$flatbuffers_cache"
 fi
 
-cmake --build "$build" --parallel "${PS4_BUILD_JOBS:-2}"
+# Keep building independent targets after a failure. One Actions run then
+# reports multiple missing PS4 adaptations instead of stopping at the first.
+cmake --build "$build" --parallel "${PS4_BUILD_JOBS:-2}" -- -k 0
 
 rm -rf "$stage"
 DESTDIR="$stage" cmake --install "$build"
