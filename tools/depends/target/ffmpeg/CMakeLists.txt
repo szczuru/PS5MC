@@ -111,6 +111,19 @@ elseif(CORE_SYSTEM_NAME STREQUAL osx)
 elseif(CORE_SYSTEM_NAME STREQUAL wasm)
   list(APPEND ffmpeg_conf --target-os=none)
   set(CONFIGARCH --arch=wasm --cpu=wasm32)
+elseif(CORE_SYSTEM_NAME STREQUAL ps4)
+  # OpenOrbis is FreeBSD ABI; avoid host linux assumptions and asm that needs full toolchain.
+  list(APPEND ffmpeg_conf --target-os=freebsd
+                          --disable-x86asm
+                          --disable-inline-asm
+                          --disable-vulkan
+                          --disable-vaapi
+                          --disable-vdpau
+              )
+  # Our PS4 OpenSSL is built with no-sock (OpenOrbis header gaps). Kodi still has
+  # curl for HTTPS; FFmpeg protocol https is secondary for the first bootable build.
+  list(REMOVE_ITEM ffmpeg_conf --enable-openssl)
+  list(APPEND ffmpeg_conf --disable-openssl)
 endif()
 
 if(CPU MATCHES arm)
