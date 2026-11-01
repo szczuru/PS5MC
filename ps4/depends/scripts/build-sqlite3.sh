@@ -32,7 +32,7 @@ fi
 
 autoreconf -vif
 export CC CFLAGS="$CFLAGS -DSQLITE_TEMP_STORE=3 -DSQLITE_DEFAULT_MMAP_SIZE=0x10000000"
-export LDFLAGS
+export LDFLAGS="$LDFLAGS -nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x -Wl,--eh-frame-hdr -lc -lkernel -lSceSysmodule $OO_PS4_TOOLCHAIN/lib/crt1.o"
 if ! ./configure \
   --prefix="$PS4_PREFIX" \
   --host="$HOST" \
