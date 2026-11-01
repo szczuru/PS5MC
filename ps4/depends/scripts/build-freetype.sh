@@ -7,6 +7,7 @@ source "$(dirname "$0")/env-depends.sh"
 
 VER=2.13.2
 SRC="$PS4_BUILD/freetype-$VER"
+TARBALL="freetype-$VER.tar.xz"
 
 if [ -f "$PS4_PREFIX/lib/libfreetype.a" ]; then
   echo "freetype already built"
@@ -15,8 +16,11 @@ fi
 
 cd "$PS4_BUILD"
 if [ ! -d "$SRC" ]; then
-  curl -L -o "freetype-$VER.tar.xz" "https://download.savannah.gnu.org/releases/freetype/freetype-$VER.tar.xz"
-  tar xf "freetype-$VER.tar.xz"
+  echo "Downloading freetype $VER ..."
+  curl -fL --retry 3 -o "$TARBALL" \
+    "https://download.savannah.gnu.org/releases/freetype/freetype-${VER}.tar.xz"
+
+  tar xf "$TARBALL"
 fi
 
 cd "$SRC"
@@ -25,6 +29,6 @@ cd "$SRC"
   --without-harfbuzz --without-brotli --without-bzip2 \
   CPPFLAGS="-I$PS4_PREFIX/include" \
   LDFLAGS="-L$PS4_PREFIX/lib"
-make -j$(nproc)
+make -j"$(nproc)"
 make install
 echo "freetype OK"

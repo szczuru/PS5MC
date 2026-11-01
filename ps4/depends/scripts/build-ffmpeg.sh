@@ -1,16 +1,15 @@
 #!/bin/bash
 # FFmpeg for PS4 – software decoders only for now
-# (hardware video decode is a later stage)
 set -euo pipefail
 source "$(dirname "$0")/env-depends.sh"
 
 "$ROOT/depends/scripts/build-zlib.sh"
 "$ROOT/depends/scripts/build-bzip2.sh"
-# openssl optional for https protocols
 "$ROOT/depends/scripts/build-openssl.sh" || true
 
 VER=6.1.2
 SRC="$PS4_BUILD/ffmpeg-$VER"
+TARBALL="ffmpeg-$VER.tar.xz"
 
 if [ -f "$PS4_PREFIX/lib/libavcodec.a" ]; then
   echo "ffmpeg already built"
@@ -19,13 +18,15 @@ fi
 
 cd "$PS4_BUILD"
 if [ ! -d "$SRC" ]; then
-  curl -L -o "ffmpeg-$VER.tar.xz" "https://ffmpeg.org/releases/ffmpeg-$VER.tar.xz"
-  tar xf "ffmpeg-$VER.tar.xz"
+  echo "Downloading ffmpeg $VER ..."
+  curl -fL --retry 3 -o "$TARBALL" \
+    "https://ffmpeg.org/releases/ffmpeg-${VER}.tar.xz"
+
+  tar xf "$TARBALL"
 fi
 
 cd "$SRC"
 
-# Minimal but useful set for Kodi media playback
 ./configure \
   --prefix="$PS4_PREFIX" \
   --target-os=freebsd \
@@ -47,6 +48,6 @@ cd "$SRC"
   --extra-ldflags="$LDFLAGS -L$PS4_PREFIX/lib" \
   --pkg-config-flags="--static"
 
-make -j$(nproc)
+make -j"$(nproc)"
 make install
 echo "ffmpeg OK -> $PS4_PREFIX/lib/libavcodec.a"
