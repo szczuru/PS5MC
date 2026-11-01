@@ -83,7 +83,7 @@ jobs:
       - name: Narzędzia systemu
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq clang lld-18 cmake ninja-build curl git python3 \
+          sudo apt-get install -y -qq clang lld-18 llvm cmake ninja-build curl git python3 \
             pkg-config autoconf automake libtool nasm yasm
           sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
           sudo ln -sf /usr/bin/clang-18 /usr/bin/clang || true
