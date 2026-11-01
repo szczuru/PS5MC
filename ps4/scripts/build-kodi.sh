@@ -48,6 +48,7 @@ EOF
 
 # Install the PS4 platform sources before CMake scans the Kodi tree.
 cp -a "$root/ps4/overlay/xbmc/platform/ps4" "$root/xbmc/platform/"
+cp -a "$root/ps4/overlay/xbmc/windowing/ps4" "$root/xbmc/windowing/"
 
 cmake -S "$root" -B "$build" -G Ninja \
   -DCMAKE_TOOLCHAIN_FILE="$root/ps4/toolchain/ps4-kodi.cmake" \

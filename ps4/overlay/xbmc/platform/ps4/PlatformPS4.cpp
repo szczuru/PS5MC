@@ -1,6 +1,7 @@
 // xbmc/platform/ps4/PlatformPS4.cpp
 #include "PlatformPS4.h"
 #include "PS4Privileges.h"
+#include "windowing/ps4/WinSystemPS4.h"
 #include "utils/log.h"
 
 #include <orbis/UserService.h>
@@ -15,6 +16,8 @@ bool CPlatformPS4::InitStageOne()
   CLog::Log(LOGINFO, "PS4: Escalate privileges -> {}", PS4Privileges::ResultStr(r));
 
   sceUserServiceInitialize(nullptr);
+
+  KODI::WINDOWING::PS4::CWinSystemPS4::Register();
 
   return CPlatformPosix::InitStageOne();
 }

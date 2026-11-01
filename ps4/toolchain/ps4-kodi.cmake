@@ -47,13 +47,14 @@ set(PS4_LIBCXX_INCLUDE_DIR "${OO_PS4_TOOLCHAIN}/include/c++/v1")
 if(EXISTS "/usr/lib/llvm-18/include/c++/v1/ranges")
   set(PS4_LIBCXX_INCLUDE_DIR "/usr/lib/llvm-18/include/c++/v1")
 endif()
-set(CMAKE_CXX_FLAGS_INIT "${_ps4_common} -isystem ${PS4_LIBCXX_INCLUDE_DIR} -isystem ${OO_PS4_TOOLCHAIN}/include/c++/v1 -D_LIBCPP_HAS_MUSL_LIBC -fexceptions -fcxx-exceptions")
+set(CMAKE_CXX_FLAGS_INIT "-isystem ${PS4_LIBCXX_INCLUDE_DIR} ${_ps4_common} -D_LIBCPP_HAS_MUSL_LIBC -fexceptions -fcxx-exceptions")
 
 # Executables: PIE, Sony linker script, our libc, Sony stub libraries.
 set(CMAKE_EXE_LINKER_FLAGS_INIT
     "-nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,${OO_PS4_TOOLCHAIN}/link.x -Wl,--eh-frame-hdr -L${OO_PS4_TOOLCHAIN}/lib -L${PS4_PREFIX}/lib")
-set(CMAKE_C_STANDARD_LIBRARIES   "-lc -lkernel -lSceSysmodule ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
-set(CMAKE_CXX_STANDARD_LIBRARIES "-lc++ -lc -lkernel -lSceSysmodule ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
+set(_ps4_system_libraries "-lSceVideoOut -lSceAudioOut -lScePad -lSceUserService -lSceSystemService -lSceSysmodule -lScePigletv2VSH -lkernel -lc -lm")
+set(CMAKE_C_STANDARD_LIBRARIES   "${_ps4_system_libraries} ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
+set(CMAKE_CXX_STANDARD_LIBRARIES "-lc++ ${_ps4_system_libraries} ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
 
 # No shared libraries: a title cannot dlopen anything we ship.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)

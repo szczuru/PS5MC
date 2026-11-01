@@ -96,7 +96,11 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                               -DHAVE_FILE_UCONTEXT_H=)
     endif()
 
-    set(CMAKE_ARGS -DZLIB_LIBRARY=${DEPENDS_PATH}/lib/libz.a
+    set(CMAKE_ARGS -DOPENSSL_ROOT_DIR=${DEPENDS_PATH}
+                   -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
+                   -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
+                   -DOPENSSL_SSL_LIBRARY=${OPENSSL_SSL_LIBRARY}
+                   -DZLIB_LIBRARY=${DEPENDS_PATH}/lib/libz.a
                    -DZLIB_INCLUDE_DIR=${DEPENDS_PATH}/include
                    -DWITH_SSL=OPENSSL
                    -DWITH_UNIT_TESTS:BOOL=OFF
