@@ -3,7 +3,7 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$here/env.sh"
 
-elf="$(readlink -f "$1")"; out="$(readlink -f "$2")"; title="$3"; tid="$4"; cid="$5"; ver="$6"
+elf="$(readlink -f "$1")"; out="$(readlink -f "$2")"; title="$3"; tid="$4"; cid="$5"; ver="$6"; payload="${7:-}"
 tc="$OO_PS4_TOOLCHAIN"; bin="$tc/bin/linux"
 sample="$OO_PS4_SAMPLES/samples/piglet"
 icon="$here/../title/sce_sys/icon0.png"
@@ -13,6 +13,10 @@ rm -rf "$stage"; mkdir -p "$stage/sce_sys/about" "$stage/sce_module"
 cp "$sample/sce_sys/about/right.sprx" "$stage/sce_sys/about/right.sprx"
 cp "$sample/sce_module/libc.prx" "$sample/sce_module/libSceFios2.prx" "$stage/sce_module/"
 cp "$icon" "$stage/sce_sys/icon0.png"
+
+if [ -n "$payload" ]; then
+  cp -a "$payload"/. "$stage"/
+fi
 
 # NOTE: --authinfo powoduje crash CE-34878-0 na PS4 FW 9.00 + GoldHEN.
 # PAID 0x3800000000000035 bez authinfo dziala stabilnie.
