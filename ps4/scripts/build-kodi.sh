@@ -45,6 +45,20 @@ out="$(readlink -m "${1:-$root/../dist/kodi}")"
 build="$root/ps4/build/kodi"
 stage="$root/ps4/build/kodi-stage"
 
+# FFmpeg writes detailed cross-link probe failures to config.log, but Ninja's
+# ExternalProject wrapper otherwise hides the useful part of that file.
+dump_ffmpeg_config_log_on_failure() {
+  local status=$?
+  if [ "$status" -ne 0 ] && [ -d "$build" ]; then
+    while IFS= read -r -d '' log; do
+      echo "[ps4] FFmpeg configure log: $log" >&2
+      tail -n 160 "$log" >&2
+    done < <(find "$build" -path '*/ffbuild/config.log' -type f -print0)
+  fi
+  return "$status"
+}
+trap dump_ffmpeg_config_log_on_failure EXIT
+
 "$root/ps4/scripts/00-fetch-toolchain.sh"
 "$root/ps4/scripts/build-depends.sh"
 "$root/ps4/depends/scripts/build-harfbuzz.sh"
