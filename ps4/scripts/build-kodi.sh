@@ -33,6 +33,7 @@ for name in ("isinf", "isnan"):
 path.write_text(source)
 PY
     install -m 0644 "$root/ps4/toolchain/compat/xlocale.h" "$target_prefix/include/xlocale.h"
+    install -m 0644 "$root/ps4/toolchain/compat/pthread_np.h" "$target_prefix/include/pthread_np.h"
   done
 fi
 
