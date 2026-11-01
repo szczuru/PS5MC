@@ -24,22 +24,28 @@ Pliki w `ps4/overlay/` → kopiować do `xbmc/platform/ps4/` i `cmake/platform/p
 - `PS4PadInput.*` – pad
 - CMake + reszta szkieletu
 
-### 🟡 M3 – Zależności (w toku)
+### ✅ M3 – Zależności
 Skrypty w `ps4/depends/scripts/`:
 - zlib, bzip2, libpng, freetype
 - openssl, curl
 - **FFmpeg** (software decode H.264/HEVC itd.)
 
-Job `depends` w GitHub Actions jest aktywny.
-Cel: `ps4/depends/prefix/{lib,include}` z gotowymi `.a`.
+Job `depends` w GitHub Actions buduje bazowy zestaw bibliotek; jego artefakt jest
+przekazywany bezpośrednio do joba Kodi.
 
-### 🔲 M4 – Pełny build Kodi
-- `ps4/scripts/build-kodi.sh` (do napisania po udanym M3)
-- Aktywacja joba `kodi` w Actions
-- Kodi uruchamia się, widać interfejs
+### 🟡 M4 – Pełny build Kodi
+- Skrypt i job Actions są aktywne.
+- Nadal trzeba doprowadzić do utworzenia PKG oraz uruchomić interfejs na konsoli.
 
-### 🔲 M5 – Płyty DVD/Blu-ray
-### 🔲 M6 – Sprzętowy dekoder (opcjonalnie)
+### 🔲 M5 – Odtwarzanie DVD i dostęp do napędu
+- Kodi obecnie buduje się z `ENABLE_OPTICAL=OFF`: repo nie ma jeszcze libcdio
+  z backendem PS4. W PS4 system montuje dostępny nośnik pod `/mnt/disc`; trzeba
+  zweryfikować dostęp z sandboxu i podłączyć to jako źródło DVD.
+- Blu-ray i deszyfrowanie AACS są osobnym zakresem.
+
+### 🔲 M6 – Sprzętowy dekoder i renderer
+- Port PS5 ma implementację `libSceVideodec2`; adaptacja ABI/buforów oraz
+  integracja z rendererem GLES PS4 pozostaje do wykonania i testu na konsoli.
 
 ---
 
@@ -49,7 +55,7 @@ Cel: `ps4/depends/prefix/{lib,include}` z gotowymi `.a`.
 |-----------------------------------|----------------------------------------------|--------|
 | `main.cpp`                        | `overlay/.../main.cpp`                       | szkielet |
 | `SandboxPS5.cpp`                  | `ps4/src/PS4Privileges.cpp`                  | ✅ |
-| `VideoOutInfo` / video            | `VideoOutInfo.*` (VideoOut path)             | ✅ działa |
+| `VideoOutInfo` / video            | `VideoOutInfo.*` (VideoOut path)             | 🟡 działa w probe; brak jeszcze Kodi window system |
 | `audio/AESinkPS5.cpp`             | `AESinkPS4.cpp`                              | ✅ |
 | `input/PS5PadInput.cpp`           | `PS4PadInput.cpp`                            | szkielet |
 | toolchain                         | `ps4/toolchain/ps4-kodi.cmake`               | ✅ |

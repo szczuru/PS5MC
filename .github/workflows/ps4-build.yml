@@ -166,6 +166,11 @@ jobs:
           key: ps4-depends-${{ hashFiles('ps4/depends/scripts/*.sh') }}
           restore-keys: |
             ps4-depends-
+      - name: Pobierz zależności z joba M3
+        uses: actions/download-artifact@v4
+        with:
+          name: ps4mc-depends-prefix
+          path: ps4/depends/prefix
       - name: Pobierz toolchain
         run: bash ps4/scripts/00-fetch-toolchain.sh
       - name: Uprawnienia skryptów

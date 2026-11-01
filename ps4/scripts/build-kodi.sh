@@ -59,7 +59,7 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DDEPENDS_PATH="$prefix" \
   -DNATIVEPREFIX="$native_prefix" \
   -DENABLE_TESTING=OFF \
-  -DENABLE_OPTICAL=ON \
+  -DENABLE_OPTICAL=OFF \
   -DENABLE_PYTHON=OFF \
   -DENABLE_CEC=OFF \
   -DENABLE_INTERNAL_BLURAY=OFF \
