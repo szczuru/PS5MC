@@ -26,13 +26,45 @@ if [ ! -d "$SRC" ]; then
   tar xf "$TARBALL"
 fi
 
+# OpenSSL sees the FreeBSD target triple, but OpenOrbis does not provide
+# sys/sysctl.h or FreeBSD's KERN_ARND sysctl interface. Keep the standard
+# /dev/urandom entropy source and omit only that unsupported FreeBSD path.
+python3 - "$SRC/providers/implementations/rands/seeding/rand_unix.c" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+source = path.read_text()
+replacements = (
+    (
+        "#if (defined(__FreeBSD__) || defined(__NetBSD__)) && !defined(OPENSSL_SYS_UEFI)",
+        "#if (defined(__FreeBSD__) || defined(__NetBSD__)) && !defined(__PS4__) && !defined(OPENSSL_SYS_UEFI)",
+    ),
+    (
+        "#  if (defined(__FreeBSD__) || defined(__NetBSD__)) && defined(KERN_ARND)",
+        "#  if (defined(__FreeBSD__) || defined(__NetBSD__)) && !defined(__PS4__) && defined(KERN_ARND)",
+    ),
+    (
+        "#  elif (defined(__FreeBSD__) || defined(__NetBSD__)) && defined(KERN_ARND)",
+        "#  elif (defined(__FreeBSD__) || defined(__NetBSD__)) && !defined(__PS4__) && defined(KERN_ARND)",
+    ),
+)
+for original, patched in replacements:
+    if original in source:
+        source = source.replace(original, patched, 1)
+    elif patched not in source:
+        raise SystemExit(f"Could not find expected OpenSSL source line: {original}")
+path.write_text(source)
+PY
+
 cd "$SRC"
 
 CROSS_CC="$CC -target x86_64-pc-freebsd12-elf --sysroot=$OO_PS4_TOOLCHAIN -nostdinc ${INC_FLAGS_STR:-}"
 
-# Disable features that break on PS4/OpenOrbis headers or are unused by Kodi:
+# Disable features unavailable in OpenOrbis or unused by Kodi:
+# - sysctl is patched above; PS4 uses /dev/urandom for entropy
 # - sock / dgram / dtls (bss_dgram IPv6 struct mismatch)
-# - asm, shared, engines (devcrypto expects crypto/cryptodev.h, absent from OpenOrbis), tests
+# - asm, shared, engines (devcrypto expects crypto/cryptodev.h), tests
 ./Configure BSD-generic64 \
   no-shared no-dso no-engine no-async no-tests no-ui-console no-asm \
   no-sock no-dgram no-dtls no-dtls1 no-dtls1_2 \
