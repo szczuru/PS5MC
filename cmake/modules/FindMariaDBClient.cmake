@@ -90,7 +90,9 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                               -DHAVE_FILE_UCONTEXT_H=)
     endif()
 
-    set(CMAKE_ARGS -DWITH_SSL=OPENSSL
+    set(CMAKE_ARGS -DZLIB_LIBRARY=${DEPENDS_PATH}/lib/libz.a
+                   -DZLIB_INCLUDE_DIR=${DEPENDS_PATH}/include
+                   -DWITH_SSL=OPENSSL
                    -DWITH_UNIT_TESTS:BOOL=OFF
                    -DWITH_EXTERNAL_ZLIB:BOOL=ON
                    -DWITH_CURL:BOOL=OFF

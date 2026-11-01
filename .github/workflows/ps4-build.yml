@@ -15,6 +15,7 @@ on:
       - 'cmake/modules/FindExiv2.cmake'
       - 'cmake/modules/FindFFMPEG.cmake'
       - 'cmake/modules/FindSpdlog.cmake'
+      - 'cmake/modules/FindMariaDBClient.cmake'
       - 'cmake/modules/buildtools/FindTexturePacker.cmake'
       - 'tools/depends/target/crossguid/**'
       - '.github/workflows/ps4-build.yml'
