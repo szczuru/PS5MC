@@ -88,7 +88,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq clang lld-18 llvm cmake ninja-build curl git python3 \
-            pkg-config autoconf automake libtool nasm yasm
+            pkg-config autoconf automake libtool libtool-bin nasm yasm
           sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
           sudo ln -sf /usr/bin/clang-18 /usr/bin/clang || true
 
@@ -139,7 +139,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Narzędzia
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang lld-18 llvm cmake ninja-build curl git python3 libssl-dev pkg-config nasm autoconf automake libtool meson liblzo2-dev libpng-dev libgif-dev libjpeg-dev
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang lld-18 llvm cmake ninja-build curl git python3 libssl-dev pkg-config nasm autoconf automake libtool libtool-bin meson liblzo2-dev libpng-dev libgif-dev libjpeg-dev
       - name: libssl1.1
         run: |
           curl -fsSL -o /tmp/libssl1.1.deb \
