@@ -46,6 +46,7 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DENABLE_AIRTUNES=OFF \
   -DENABLE_UPNP=OFF \
   -DENABLE_INTERNAL_FFMPEG=ON \
+  -DENABLE_INTERNAL_FSTRCMP=ON \
   -DWITH_TEXTUREPACKER="$host_tools/TexturePacker" \
   -DUSE_INTERNAL_LIBS=ON
 
