@@ -8,4 +8,3 @@ xbmc/platform/posix/utils platform/posix/utils
 xbmc/platform/ps4 platform/ps4
 xbmc/platform/ps4/audio platform/ps4/audio
 xbmc/platform/ps4/input platform/ps4/input
-xbmc/platform/ps4/video platform/ps4/video
