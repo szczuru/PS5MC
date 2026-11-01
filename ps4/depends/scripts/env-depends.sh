@@ -4,7 +4,6 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-# Load base env
 if [ -f "$ROOT/scripts/env.sh" ]; then
   # shellcheck source=/dev/null
   source "$ROOT/scripts/env.sh"
@@ -17,7 +16,7 @@ mkdir -p "$PS4_PREFIX" "$PS4_BUILD"
 export OO_PS4_TOOLCHAIN="${OO_PS4_TOOLCHAIN:-$HOME/OpenOrbis/PS4Toolchain}"
 export PATH="$OO_PS4_TOOLCHAIN/bin/linux:$OO_PS4_TOOLCHAIN/bin:$PATH"
 
-# Use toolchain clang if available, else system clang with heavy flags
+# Compiler
 if [ -x "$OO_PS4_TOOLCHAIN/bin/linux/clang" ]; then
   export CC="$OO_PS4_TOOLCHAIN/bin/linux/clang"
   export CXX="$OO_PS4_TOOLCHAIN/bin/linux/clang++"
@@ -29,27 +28,44 @@ else
   export CXX="clang++"
 fi
 
-export AR="${AR:-llvm-ar}"
-export RANLIB="${RANLIB:-llvm-ranlib}"
-export STRIP="${STRIP:-llvm-strip}"
-export NM="${NM:-llvm-nm}"
+# Archiver – try several common names/locations
+if command -v llvm-ar >/dev/null 2>&1; then
+  export AR="$(command -v llvm-ar)"
+elif [ -x "$OO_PS4_TOOLCHAIN/bin/linux/llvm-ar" ]; then
+  export AR="$OO_PS4_TOOLCHAIN/bin/linux/llvm-ar"
+elif [ -x "$OO_PS4_TOOLCHAIN/bin/llvm-ar" ]; then
+  export AR="$OO_PS4_TOOLCHAIN/bin/llvm-ar"
+elif command -v ar >/dev/null 2>&1; then
+  export AR="$(command -v ar)"
+else
+  export AR="ar"
+fi
 
-# Discover include roots inside the toolchain
+if command -v llvm-ranlib >/dev/null 2>&1; then
+  export RANLIB="$(command -v llvm-ranlib)"
+elif command -v ranlib >/dev/null 2>&1; then
+  export RANLIB="$(command -v ranlib)"
+else
+  export RANLIB="ranlib"
+fi
+
+export STRIP="${STRIP:-strip}"
+export NM="${NM:-nm}"
+
+# Include roots
 INC_FLAGS=()
 for d in \
   "$OO_PS4_TOOLCHAIN/include" \
   "$OO_PS4_TOOLCHAIN/target/include" \
   "$OO_PS4_TOOLCHAIN/usr/include" \
   "$OO_PS4_TOOLCHAIN/lib/clang/18/include" \
-  "$OO_PS4_TOOLCHAIN/lib/clang/17/include" \
-  "$OO_PS4_TOOLCHAIN/lib/clang/16/include"
+  "$OO_PS4_TOOLCHAIN/lib/clang/17/include"
 do
   if [ -d "$d" ]; then
     INC_FLAGS+=(-isystem "$d")
   fi
 done
 
-# Hard isolation from host headers
 export CFLAGS="-O2 -fPIC -target x86_64-pc-freebsd12-elf -D__PS4__ -DPS4 -D__ORBIS__ --sysroot=$OO_PS4_TOOLCHAIN -nostdinc ${INC_FLAGS[*]}"
 export CXXFLAGS="$CFLAGS -fno-exceptions -fno-rtti"
 export LDFLAGS="-L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib --sysroot=$OO_PS4_TOOLCHAIN"
@@ -62,5 +78,6 @@ export PREFIX="$PS4_PREFIX"
 echo "[depends] PREFIX=$PS4_PREFIX"
 echo "[depends] OO_PS4_TOOLCHAIN=$OO_PS4_TOOLCHAIN"
 echo "[depends] CC=$CC"
-echo "[depends] include dirs found:"
-for d in "${INC_FLAGS[@]}"; do echo "  $d"; done
+echo "[depends] AR=$AR"
+echo "[depends] include dirs:"
+printf '  %s\n' "${INC_FLAGS[@]}"
