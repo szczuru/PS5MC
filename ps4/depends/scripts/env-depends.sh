@@ -16,7 +16,6 @@ mkdir -p "$PS4_PREFIX" "$PS4_BUILD"
 export OO_PS4_TOOLCHAIN="${OO_PS4_TOOLCHAIN:-$HOME/OpenOrbis/PS4Toolchain}"
 export PATH="$OO_PS4_TOOLCHAIN/bin/linux:$OO_PS4_TOOLCHAIN/bin:$PATH"
 
-# Compiler
 if [ -x "$OO_PS4_TOOLCHAIN/bin/linux/clang" ]; then
   export CC="$OO_PS4_TOOLCHAIN/bin/linux/clang"
   export CXX="$OO_PS4_TOOLCHAIN/bin/linux/clang++"
@@ -28,13 +27,10 @@ else
   export CXX="clang++"
 fi
 
-# Archiver – try several common names/locations
 if command -v llvm-ar >/dev/null 2>&1; then
   export AR="$(command -v llvm-ar)"
 elif [ -x "$OO_PS4_TOOLCHAIN/bin/linux/llvm-ar" ]; then
   export AR="$OO_PS4_TOOLCHAIN/bin/linux/llvm-ar"
-elif [ -x "$OO_PS4_TOOLCHAIN/bin/llvm-ar" ]; then
-  export AR="$OO_PS4_TOOLCHAIN/bin/llvm-ar"
 elif command -v ar >/dev/null 2>&1; then
   export AR="$(command -v ar)"
 else
@@ -52,17 +48,32 @@ fi
 export STRIP="${STRIP:-strip}"
 export NM="${NM:-nm}"
 
-# Include roots
+# Include roots: toolchain + clang builtins (emmintrin.h etc.)
 INC_FLAGS=()
 for d in \
   "$OO_PS4_TOOLCHAIN/include" \
   "$OO_PS4_TOOLCHAIN/target/include" \
-  "$OO_PS4_TOOLCHAIN/usr/include" \
-  "$OO_PS4_TOOLCHAIN/lib/clang/18/include" \
-  "$OO_PS4_TOOLCHAIN/lib/clang/17/include"
+  "$OO_PS4_TOOLCHAIN/usr/include"
 do
   if [ -d "$d" ]; then
     INC_FLAGS+=(-isystem "$d")
+  fi
+done
+
+# Clang resource dir (SSE/AVX intrinsics headers)
+CLANG_RES="$($CC -print-resource-dir 2>/dev/null || true)"
+if [ -n "$CLANG_RES" ] && [ -d "$CLANG_RES/include" ]; then
+  INC_FLAGS+=(-isystem "$CLANG_RES/include")
+fi
+# Fallback common locations
+for d in \
+  /usr/lib/llvm-18/lib/clang/18/include \
+  /usr/lib/llvm-17/lib/clang/17/include \
+  /usr/lib/clang/18/include
+do
+  if [ -d "$d" ]; then
+    INC_FLAGS+=(-isystem "$d")
+    break
   fi
 done
 

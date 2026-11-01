@@ -29,7 +29,7 @@ mkdir build-ps4 && cd build-ps4
 # Avoid executable link tests – we only need a static library
 cmake .. \
   -DCMAKE_C_COMPILER="$CC" \
-  -DCMAKE_C_FLAGS="$CFLAGS" \
+  -DCMAKE_C_FLAGS="$CFLAGS -DFT_CONFIG_OPTION_DISABLE_SSE" \
   -DCMAKE_AR="$AR" \
   -DCMAKE_RANLIB="$RANLIB" \
   -DCMAKE_INSTALL_PREFIX="$PS4_PREFIX" \
@@ -40,7 +40,7 @@ cmake .. \
   -DFT_DISABLE_HARFBUZZ=ON \
   -DFT_DISABLE_BROTLI=ON \
   -DFT_DISABLE_BZIP2=ON \
-  -DFT_DISABLE_PNG=ON \
+  -DFT_DISABLE_PNG=ON -DFT_DISABLE_HARFBUZZ=ON \
   -DZLIB_LIBRARY="$PS4_PREFIX/lib/libz.a" \
   -DZLIB_INCLUDE_DIR="$PS4_PREFIX/include" \
   -DCMAKE_BUILD_TYPE=Release
