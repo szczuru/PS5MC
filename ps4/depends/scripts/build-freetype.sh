@@ -23,33 +23,29 @@ if [ ! -d "$SRC" ]; then
 fi
 
 cd "$SRC"
+rm -rf build-ps4
+mkdir build-ps4 && cd build-ps4
 
-# Use cmake if available (more reliable for cross), else minimal autotools with cache
-if command -v cmake >/dev/null 2>&1; then
-  rm -rf build-ps4
-  mkdir build-ps4 && cd build-ps4
-  cmake .. \
-    -DCMAKE_C_COMPILER="$CC" \
-    -DCMAKE_C_FLAGS="$CFLAGS" \
-    -DCMAKE_AR="$AR" \
-    -DCMAKE_RANLIB="$RANLIB" \
-    -DCMAKE_INSTALL_PREFIX="$PS4_PREFIX" \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DFT_DISABLE_HARFBUZZ=ON \
-    -DFT_DISABLE_BROTLI=ON \
-    -DFT_DISABLE_BZIP2=ON \
-    -DFT_REQUIRE_ZLIB=ON \
-    -DZLIB_LIBRARY="$PS4_PREFIX/lib/libz.a" \
-    -DZLIB_INCLUDE_DIR="$PS4_PREFIX/include" \
-    -DPNG_LIBRARY="$PS4_PREFIX/lib/libpng16.a" \
-    -DPNG_PNG_INCLUDE_DIR="$PS4_PREFIX/include" \
-    -DCMAKE_SYSTEM_NAME=FreeBSD \
-    -DCMAKE_SYSTEM_PROCESSOR=x86_64
-  cmake --build . -j"$(nproc)"
-  cmake --install .
-else
-  echo "cmake not found, skipping freetype for now"
-  exit 1
-fi
+# Avoid executable link tests – we only need a static library
+cmake .. \
+  -DCMAKE_C_COMPILER="$CC" \
+  -DCMAKE_C_FLAGS="$CFLAGS" \
+  -DCMAKE_AR="$AR" \
+  -DCMAKE_RANLIB="$RANLIB" \
+  -DCMAKE_INSTALL_PREFIX="$PS4_PREFIX" \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+  -DCMAKE_SYSTEM_NAME=Generic \
+  -DCMAKE_SYSTEM_PROCESSOR=x86_64 \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DFT_DISABLE_HARFBUZZ=ON \
+  -DFT_DISABLE_BROTLI=ON \
+  -DFT_DISABLE_BZIP2=ON \
+  -DFT_DISABLE_PNG=ON \
+  -DZLIB_LIBRARY="$PS4_PREFIX/lib/libz.a" \
+  -DZLIB_INCLUDE_DIR="$PS4_PREFIX/include" \
+  -DCMAKE_BUILD_TYPE=Release
+
+cmake --build . -j"$(nproc)"
+cmake --install .
 
 echo "freetype OK"
