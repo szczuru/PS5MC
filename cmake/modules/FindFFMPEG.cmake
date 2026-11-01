@@ -214,9 +214,9 @@ macro(buildFFMPEG)
     if(CORE_SYSTEM_NAME STREQUAL "ps4")
       # OpenOrbis builds OpenSSL without DTLS. FFmpeg uses DTLS_get_data_mtu
       # only as a feature probe, so check the always-present TLS constructor.
-      list(APPEND PATCH_COMMAND COMMAND ${CMAKE_COMMAND} -E env python3
+      list(APPEND PATCH_COMMAND COMMAND ${CMAKE_COMMAND} -E copy
                                 ${CMAKE_SOURCE_DIR}/ps4/scripts/patch-ffmpeg-configure-openssl.py
-                                <SOURCE_DIR>/configure)
+                                <SOURCE_DIR>/patch-ffmpeg-configure-openssl.py)
     endif()
 
     if(NOT DISABLE_FFMPEG_SOURCE_PLUGINS)

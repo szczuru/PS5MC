@@ -171,6 +171,12 @@ else()
 endif()
 list(APPEND sourceplugin_patch COMMAND patch -p1 -i <SOURCE_DIR>/008-ffmpeg-all-pgssubdec-use-caller-colorspace.patch)
 
+if(CORE_SYSTEM_NAME STREQUAL ps4)
+  # OpenOrbis disables DTLS in OpenSSL; test a core TLS symbol instead.
+  list(APPEND sourceplugin_patch COMMAND python3
+       <SOURCE_DIR>/patch-ffmpeg-configure-openssl.py <SOURCE_DIR>/configure)
+endif()
+
 include(ExternalProject)
 externalproject_add(ffmpeg
                     SOURCE_DIR ${CMAKE_SOURCE_DIR}
