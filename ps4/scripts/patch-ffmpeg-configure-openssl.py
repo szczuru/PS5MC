@@ -9,7 +9,8 @@ source = path.read_text()
 message = 'die "OpenSSL <3.0.0 is incompatible with the gpl"'
 message_at = source.find(message)
 if message_at < 0:
-    raise SystemExit(f"Could not locate FFmpeg OpenSSL/GPL message in {path}")
+    print(f"FFmpeg configure has no OpenSSL/GPL guard; no PS4 patch needed: {path}")
+    raise SystemExit(0)
 
 probe_at = source.rfind("check_pkg_config openssl", max(0, message_at - 2048), message_at)
 patched_at = source.rfind("enabled openssl", max(0, message_at - 2048), message_at)
