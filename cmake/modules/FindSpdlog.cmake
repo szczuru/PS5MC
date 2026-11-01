@@ -31,6 +31,7 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
   
     set(CMAKE_ARGS -DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
                    -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+                   -Dfmt_DIR=${DEPENDS_PATH}/lib/cmake/fmt
                    -DSPDLOG_BUILD_EXAMPLE=OFF
                    -DSPDLOG_BUILD_TESTS=OFF
                    -DSPDLOG_BUILD_BENCH=OFF
