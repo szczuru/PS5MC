@@ -105,6 +105,7 @@ if ! meson setup "$BUILD" "$SRC" \
   -Dintrospection=disabled \
   -Dutilities=disabled \
   -Dgpu=disabled \
+  -Draster=disabled \
   -Dgraphite2=disabled \
   -Dpkg_config_path="$PS4_PREFIX/lib/pkgconfig"; then
   echo "=== Meson configuration log ==="
