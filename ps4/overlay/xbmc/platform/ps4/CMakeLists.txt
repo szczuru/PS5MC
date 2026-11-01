@@ -19,8 +19,3 @@ set(HEADERS
 )
 
 core_add_library(platform_ps4)
-
-add_subdirectory(audio)
-add_subdirectory(input)
-add_subdirectory(video)
-# add_subdirectory(filesystem)  # later
