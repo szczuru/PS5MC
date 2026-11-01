@@ -46,6 +46,9 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                    -DEXIV2_ENABLE_INIH=OFF
                    -DEXIV2_ENABLE_FILESYSTEM_ACCESS=OFF
                    -DEXIV2_BUILD_EXIV2_COMMAND=OFF
+                   -DBROTLIDEC_LIBRARY=${DEPENDS_PATH}/lib/libbrotlidec.a
+                   -DBROTLICOMMON_LIBRARY=${DEPENDS_PATH}/lib/libbrotlicommon.a
+                   -DBROTLI_INCLUDE_DIR=${DEPENDS_PATH}/include
                    -DZLIB_LIBRARY=${DEPENDS_PATH}/lib/libz.a
                    -DZLIB_INCLUDE_DIR=${DEPENDS_PATH}/include
                    ${EXTRA_ARGS})
