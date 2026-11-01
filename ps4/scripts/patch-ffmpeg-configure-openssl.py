@@ -24,11 +24,11 @@ probe_end = source.find("\n", probe_at)
 probe = source[probe_at:probe_end]
 dtls_probe = "DTLS_get_data_mtu"
 if dtls_probe not in probe:
-    if "SSL_new" in probe:
+    if "TLS_method" in probe:
         print(f"FFmpeg OpenSSL probe already PS4-compatible: {path}")
         raise SystemExit(0)
     raise SystemExit(f"Unexpected FFmpeg OpenSSL probe in {path}: {probe}")
-source = source[:probe_at] + probe.replace(dtls_probe, "SSL_new", 1) + source[probe_end:]
+source = source[:probe_at] + probe.replace(dtls_probe, "TLS_method", 1) + source[probe_end:]
 
 path.write_text(source)
 print(f"Patched FFmpeg OpenSSL probe for PS4: {path}")
