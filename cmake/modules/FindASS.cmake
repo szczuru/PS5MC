@@ -21,6 +21,8 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
 
     if(NOT (WIN32 OR WINDOWS_STORE))
       find_package(Fontconfig REQUIRED ${SEARCH_QUIET})
+      # Static console Fontconfig needs its private Expat dependency at final link.
+      find_package(EXPAT REQUIRED ${SEARCH_QUIET})
     endif()
 
     set(${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_VERSION ${${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_VER})
@@ -87,6 +89,7 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
       endif()
 
       list(APPEND ${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_LINK_LIBRARIES Fontconfig::Fontconfig)
+      list(APPEND ${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_LINK_LIBRARIES EXPAT::EXPAT)
       add_dependencies(${${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_BUILD_NAME} Fontconfig::Fontconfig)
     endif()
 
