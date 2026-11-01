@@ -32,7 +32,7 @@ if ! ./configure --host="$HOST" --prefix="$PS4_PREFIX" \
   --disable-tftp --disable-pop3 --disable-imap --disable-smb \
   --disable-smtp --disable-gopher --disable-mqtt \
   --without-libpsl --without-brotli --without-zstd --without-libidn2 \
-  CPPFLAGS="-D_DEFAULT_SOURCE -D_BSD_SOURCE -I$PS4_PREFIX/include" \
+  CPPFLAGS="-D_DEFAULT_SOURCE -D_BSD_SOURCE -DSOL_IP=IPPROTO_IP -I$PS4_PREFIX/include" \
   LDFLAGS="-nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x --sysroot=$OO_PS4_TOOLCHAIN -L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib" \
   LIBS="-lc -lkernel -lSceSysmodule -lSceNet $OO_PS4_TOOLCHAIN/lib/crt1.o"; then
   echo "curl configure failed; relevant diagnostics from config.log:"
