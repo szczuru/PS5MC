@@ -19,6 +19,9 @@ on:
       - 'cmake/modules/FindPCRE2.cmake'
       - 'cmake/modules/buildtools/FindTexturePacker.cmake'
       - 'tools/depends/target/crossguid/**'
+      - 'tools/depends/target/ffmpeg/**'
+      - 'tools/depends/target/exiv2/**'
+      - 'tools/depends/target/spdlog/**'
       - '.github/workflows/ps4-build.yml'
 
 permissions:

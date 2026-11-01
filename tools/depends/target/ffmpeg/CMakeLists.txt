@@ -171,6 +171,13 @@ else()
 endif()
 list(APPEND sourceplugin_patch COMMAND patch -p1 -i <SOURCE_DIR>/008-ffmpeg-all-pgssubdec-use-caller-colorspace.patch)
 
+if(CMAKE_C_FLAGS MATCHES "__PS4__" OR CMAKE_CXX_FLAGS MATCHES "__PS4__"
+   OR CORE_SYSTEM_NAME STREQUAL "ps4" OR CORE_PLATFORM_NAME STREQUAL "ps4")
+  # Kodi's patch series can restore FFmpeg's OpenSSL/GPL probe. Run after it.
+  list(APPEND sourceplugin_patch COMMAND python3
+       ${PROJECTSOURCE}/ps4/scripts/patch-ffmpeg-configure-openssl.py <SOURCE_DIR>/configure)
+endif()
+
 include(ExternalProject)
 externalproject_add(ffmpeg
                     SOURCE_DIR ${CMAKE_SOURCE_DIR}
