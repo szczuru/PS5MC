@@ -25,7 +25,7 @@ fi
 
 cd "$SRC"
 if ! ./configure --host="$HOST" --prefix="$PS4_PREFIX" \
-  --enable-static --disable-shared \
+  --enable-static --disable-shared --disable-tool \\
   --with-zlib="$PS4_PREFIX" \
   --with-openssl="$PS4_PREFIX" \
   --disable-ldap --disable-rtsp --disable-dict --disable-telnet \
