@@ -54,8 +54,11 @@ if(NOT TARGET TexturePacker::TexturePacker::Executable)
       endif()
     endif()
 
+    # Kodi on PS4 runs under the FreeBSD ABI but cannot execute host build tools.
+    if(CORE_SYSTEM_NAME STREQUAL "ps4")
+      set(INTERNAL_TEXTUREPACKER_INSTALLABLE FALSE CACHE BOOL "" FORCE)
     # Ship TexturePacker only on Linux and FreeBSD
-    if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
       # But skip shipping it if build architecture can be executed on host
       # and TEXTUREPACKER_EXECUTABLE is found
       if(NOT (HOST_CAN_EXECUTE_TARGET AND TEXTUREPACKER_EXECUTABLE))
