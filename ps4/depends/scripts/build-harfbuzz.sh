@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Build the target HarfBuzz library required by libass for Kodi subtitles.
+set -euo pipefail
+source "$(dirname "$0")/env-depends.sh"
+
+VER=14.2.0
+SRC="$PS4_BUILD/harfbuzz-$VER"
+TARBALL="harfbuzz-$VER.tar.xz"
+BUILD="$SRC/build-ps4"
+MESON_CROSS="$PS4_BUILD/ps4-meson-cross.ini"
+
+if [ -f "$PS4_PREFIX/lib/libharfbuzz.a" ] && [ -f "$PS4_PREFIX/lib/pkgconfig/harfbuzz.pc" ]; then
+  echo "harfbuzz already built"
+  exit 0
+fi
+
+mkdir -p "$PS4_BUILD"
+if [ ! -d "$SRC" ]; then
+  cd "$PS4_BUILD"
+  curl -fL --retry 3 -o "$TARBALL" \
+    "https://github.com/harfbuzz/harfbuzz/releases/download/$VER/$TARBALL"
+  tar xf "$TARBALL"
+fi
+
+cat > "$MESON_CROSS" <<EOF
+[binaries]
+c = ['$CC']
+cpp = ['$CXX']
+ar = ['$AR']
+strip = ['$STRIP']
+pkgconfig = ['pkg-config']
+
+[properties]
+needs_exe_wrapper = true
+sys_root = '$OO_PS4_TOOLCHAIN'
+
+[host_machine]
+system = 'freebsd'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
+
+[built-in options]
+c_args = ['-target', 'x86_64-pc-freebsd12-elf', '--sysroot=$OO_PS4_TOOLCHAIN', '-nostdinc', '-isystem', '$OO_PS4_TOOLCHAIN/include', '-isystem', '$PS4_PREFIX/include']
+cpp_args = ['-target', 'x86_64-pc-freebsd12-elf', '--sysroot=$OO_PS4_TOOLCHAIN', '-nostdinc', '-isystem', '$OO_PS4_TOOLCHAIN/include', '-isystem', '$PS4_PREFIX/include']
+c_link_args = ['--sysroot=$OO_PS4_TOOLCHAIN', '-L$OO_PS4_TOOLCHAIN/lib', '-L$PS4_PREFIX/lib']
+cpp_link_args = ['--sysroot=$OO_PS4_TOOLCHAIN', '-L$OO_PS4_TOOLCHAIN/lib', '-L$PS4_PREFIX/lib']
+EOF
+
+export PKG_CONFIG_PATH="$PS4_PREFIX/lib/pkgconfig"
+export PKG_CONFIG_LIBDIR="$PS4_PREFIX/lib/pkgconfig"
+export PKG_CONFIG_SYSROOT_DIR="$OO_PS4_TOOLCHAIN"
+
+rm -rf "$BUILD"
+meson setup "$BUILD" "$SRC" \
+  --cross-file "$MESON_CROSS" \
+  --prefix "$PS4_PREFIX" \
+  --libdir lib \
+  --buildtype release \
+  -Ddefault_library=static \
+  -Db_staticpic=true \
+  -Ddocs=disabled \
+  -Dtests=disabled \
+  -Dicu=disabled \
+  -Dicu_builtin=false \
+  -Dfreetype=enabled \
+  -Dglib=disabled \
+  -Dgobject=disabled \
+  -Dintrospection=disabled \
+  -Dutilities=disabled \
+  -Dgpu=disabled \
+  -Dgraphite2=disabled
+ninja -C "$BUILD"
+ninja -C "$BUILD" install
+echo "harfbuzz OK -> $PS4_PREFIX/lib/libharfbuzz.a"
