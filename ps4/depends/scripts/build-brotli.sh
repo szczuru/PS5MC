@@ -24,7 +24,6 @@ if [ ! -d "$SRC" ]; then
   curl -fL --retry 3 -o "$TARBALL" \
     "https://github.com/google/brotli/archive/refs/tags/v$VER.tar.gz"
   tar xf "$TARBALL"
-  mv "brotli-$VER" "$SRC"
 fi
 
 cd "$SRC"
