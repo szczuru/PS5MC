@@ -1,9 +1,9 @@
 // xbmc/platform/ps4/PlatformPS4.h
 #pragma once
 
-#include "platform/Platform.h"
+#include "platform/posix/PlatformPosix.h"
 
-class CPlatformPS4 : public CPlatform
+class CPlatformPS4 : public CPlatformPosix
 {
 public:
   CPlatformPS4() = default;
@@ -11,7 +11,7 @@ public:
 
   bool InitStageOne() override;
   bool InitStageTwo() override;
-  void Deinit() override;
+  void DeinitStageOne() override;
 
   bool IsConfigureAddonsAtStartupEnabled() override { return false; }
 };
