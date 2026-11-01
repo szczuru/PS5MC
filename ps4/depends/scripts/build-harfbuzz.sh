@@ -8,6 +8,7 @@ SRC="$PS4_BUILD/harfbuzz-$VER"
 TARBALL="harfbuzz-$VER.tar.xz"
 BUILD="$SRC/build-ps4"
 MESON_CROSS="$PS4_BUILD/ps4-meson-cross.ini"
+CLANG_RESOURCE="$("$CC" -print-resource-dir)"
 
 if [ -f "$PS4_PREFIX/lib/libharfbuzz.a" ] && [ -f "$PS4_PREFIX/lib/pkgconfig/harfbuzz.pc" ]; then
   echo "harfbuzz already built"
@@ -57,8 +58,8 @@ cpu = 'x86_64'
 endian = 'little'
 
 [built-in options]
-c_args = ['-target', 'x86_64-pc-freebsd12-elf', '--sysroot=$OO_PS4_TOOLCHAIN', '-nostdinc', '-isystem', '$OO_PS4_TOOLCHAIN/include', '-isystem', '$PS4_PREFIX/include']
-cpp_args = ['-target', 'x86_64-pc-freebsd12-elf', '--sysroot=$OO_PS4_TOOLCHAIN', '-nostdinc', '-isystem', '$OO_PS4_TOOLCHAIN/include', '-isystem', '$OO_PS4_TOOLCHAIN/include/c++/v1', '-isystem', '$PS4_PREFIX/include', '-include', 'stdlib.h']
+c_args = ['-target', 'x86_64-pc-freebsd12-elf', '--sysroot=$OO_PS4_TOOLCHAIN', '-nostdinc', '-isystem', '$OO_PS4_TOOLCHAIN/include', '-isystem', '$CLANG_RESOURCE/include', '-isystem', '$PS4_PREFIX/include']
+cpp_args = ['-target', 'x86_64-pc-freebsd12-elf', '--sysroot=$OO_PS4_TOOLCHAIN', '-nostdinc', '-isystem', '$OO_PS4_TOOLCHAIN/include', '-isystem', '$OO_PS4_TOOLCHAIN/include/c++/v1', '-isystem', '$CLANG_RESOURCE/include', '-isystem', '$PS4_PREFIX/include', '-include', 'stdlib.h']
 c_link_args = ['--sysroot=$OO_PS4_TOOLCHAIN', '-nostdlib', '-fuse-ld=lld', '-pie', '-Wl,-m,elf_x86_64', '-Wl,--script,$OO_PS4_TOOLCHAIN/link.x', '-Wl,--eh-frame-hdr', '-L$OO_PS4_TOOLCHAIN/lib', '-L$PS4_PREFIX/lib', '-lc', '-lkernel', '-lSceSysmodule', '$OO_PS4_TOOLCHAIN/lib/crt1.o']
 cpp_link_args = ['--sysroot=$OO_PS4_TOOLCHAIN', '-nostdlib', '-fuse-ld=lld', '-pie', '-Wl,-m,elf_x86_64', '-Wl,--script,$OO_PS4_TOOLCHAIN/link.x', '-Wl,--eh-frame-hdr', '-L$OO_PS4_TOOLCHAIN/lib', '-L$PS4_PREFIX/lib', '-lc++', '-lc', '-lkernel', '-lSceSysmodule', '$OO_PS4_TOOLCHAIN/lib/crt1.o']
 EOF
