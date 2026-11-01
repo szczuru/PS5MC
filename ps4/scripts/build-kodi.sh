@@ -22,6 +22,7 @@ stage="$root/ps4/build/kodi-stage"
 "$root/ps4/depends/scripts/build-brotli.sh"
 "$root/ps4/depends/scripts/build-nghttp2.sh"
 "$root/ps4/depends/scripts/build-sqlite3.sh"
+"$root/ps4/depends/scripts/build-tinyxml.sh"
 
 # TexturePacker runs on the build host while generating Kodi skin assets.
 host_tools="$root/ps4/build/host-texturepacker"
