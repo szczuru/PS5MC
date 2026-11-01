@@ -54,6 +54,24 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DWITH_TEXTUREPACKER="$host_tools/TexturePacker" \
   -DUSE_INTERNAL_LIBS=ON
 
+# Kodi builds host flatc and the target library from the same archive. Seed
+# the shared download cache first so parallel ExternalProject steps cannot
+# overwrite the archive while verifying it.
+flatbuffers_version_file="$root/tools/depends/native/flatbuffers/FLATBUFFERS-VERSION"
+flatbuffers_version="$(sed -n 's/^VERSION=//p' "$flatbuffers_version_file")"
+flatbuffers_sha512="$(sed -n 's/^SHA512=//p' "$flatbuffers_version_file")"
+flatbuffers_archive="flatbuffers-${flatbuffers_version}.tar.gz"
+flatbuffers_cache="$build/build/download/$flatbuffers_archive"
+mkdir -p "$(dirname "$flatbuffers_cache")"
+if ! printf '%s  %s\n' "$flatbuffers_sha512" "$flatbuffers_cache" | sha512sum --check --status; then
+  flatbuffers_tmp="$flatbuffers_cache.tmp"
+  curl -fL --retry 3 \
+    "https://mirrors.kodi.tv/build-deps/sources/$flatbuffers_archive" \
+    -o "$flatbuffers_tmp"
+  printf '%s  %s\n' "$flatbuffers_sha512" "$flatbuffers_tmp" | sha512sum --check
+  mv "$flatbuffers_tmp" "$flatbuffers_cache"
+fi
+
 cmake --build "$build" --parallel "${PS4_BUILD_JOBS:-2}"
 
 rm -rf "$stage"
