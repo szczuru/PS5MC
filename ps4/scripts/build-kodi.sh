@@ -17,6 +17,12 @@ stage="$root/ps4/build/kodi-stage"
 "$root/ps4/scripts/00-fetch-toolchain.sh"
 "$root/ps4/scripts/build-depends.sh"
 
+# TexturePacker runs on the build host while generating Kodi skin assets.
+host_tools="$root/ps4/build/host-texturepacker"
+cmake -S "$root/tools/depends/native/TexturePacker/src" -B "$host_tools" \
+  -DCMAKE_BUILD_TYPE=Release -DKODI_SOURCE_DIR="$root"
+cmake --build "$host_tools" --parallel "${PS4_BUILD_JOBS:-2}"
+
 # Install the PS4 platform sources before CMake scans the Kodi tree.
 cp -a "$root/ps4/overlay/xbmc/platform/ps4" "$root/xbmc/platform/"
 
@@ -34,6 +40,7 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DENABLE_UPNP=OFF \
   -DENABLE_INTERNAL_FFMPEG=OFF \
   -DFFMPEG_PATH="$prefix" \
+  -DWITH_TEXTUREPACKER="$host_tools/TexturePacker" \
   -DUSE_INTERNAL_LIBS=ON
 
 cmake --build "$build" --parallel "${PS4_BUILD_JOBS:-2}"
