@@ -32,7 +32,6 @@ pkgconfig = ['pkg-config']
 
 [properties]
 needs_exe_wrapper = true
-sys_root = '$OO_PS4_TOOLCHAIN'
 
 [host_machine]
 system = 'freebsd'
