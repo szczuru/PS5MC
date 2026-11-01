@@ -77,6 +77,7 @@ do
   fi
 done
 
+export INC_FLAGS_STR="${INC_FLAGS[*]}"
 export CFLAGS="-O2 -fPIC -target x86_64-pc-freebsd12-elf -D__PS4__ -DPS4 -D__ORBIS__ --sysroot=$OO_PS4_TOOLCHAIN -nostdinc ${INC_FLAGS[*]}"
 export CXXFLAGS="$CFLAGS -fno-exceptions -fno-rtti"
 export LDFLAGS="-L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib --sysroot=$OO_PS4_TOOLCHAIN"

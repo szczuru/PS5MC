@@ -21,16 +21,24 @@ if [ ! -d "$SRC" ]; then
 
   if ! gzip -t "$TARBALL" 2>/dev/null; then
     echo "ERROR: openssl tarball invalid"
-    file "$TARBALL" || true
     exit 1
   fi
   tar xf "$TARBALL"
 fi
 
 cd "$SRC"
-./Configure BSD-generic64 no-shared no-dso no-async no-tests no-ui-console \
-  --prefix="$PS4_PREFIX" --openssldir="$PS4_PREFIX/ssl" \
-  -D__PS4__ $CFLAGS
+
+# Put cross flags into CC so Configure does not see them as targets
+CROSS_CC="$CC -target x86_64-pc-freebsd12-elf --sysroot=$OO_PS4_TOOLCHAIN -nostdinc ${INC_FLAGS_STR:-}"
+
+./Configure BSD-generic64 \
+  no-shared no-dso no-async no-tests no-ui-console no-asm \
+  --prefix="$PS4_PREFIX" \
+  --openssldir="$PS4_PREFIX/ssl" \
+  -D__PS4__ -D__ORBIS__ \
+  CC="$CROSS_CC" \
+  AR="$AR" \
+  RANLIB="$RANLIB"
 
 make -j"$(nproc)" build_libs
 make install_dev
