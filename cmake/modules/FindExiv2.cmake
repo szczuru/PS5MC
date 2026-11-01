@@ -46,8 +46,8 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                    -DEXIV2_ENABLE_INIH=OFF
                    -DEXIV2_ENABLE_FILESYSTEM_ACCESS=OFF
                    -DEXIV2_BUILD_EXIV2_COMMAND=OFF
-                   -DZLIB_LIBRARY=${ZLIB_LIBRARY}
-                   -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR}
+                   -DZLIB_LIBRARY=${DEPENDS_PATH}/lib/libz.a
+                   -DZLIB_INCLUDE_DIR=${DEPENDS_PATH}/include
                    ${EXTRA_ARGS})
 
     if(NOT CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "")
