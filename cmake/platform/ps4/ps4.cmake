@@ -5,4 +5,4 @@ list(APPEND AUDIO_BACKENDS_LIST "ps4")
 set(GL_INTERFACES_LIST "VideoOut")
 
 # No optical media support in the initial PS4 port.
-list(APPEND PLATFORM_OPTIONAL_DEPS_EXCLUDE "^(Bluray|Udfread|XSLT)$")
+list(APPEND PLATFORM_OPTIONAL_DEPS_EXCLUDE "^(Bluray|Udfread|XSLT|MicroHttpd)$")

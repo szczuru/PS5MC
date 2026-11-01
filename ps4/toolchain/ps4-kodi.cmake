@@ -40,7 +40,14 @@ set(PS4_PREFIX "${OO_PS4_TOOLCHAIN}/ps4mc-prefix" CACHE PATH "install prefix of 
 
 set(_ps4_common "-fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_PREFIX}/include")
 set(CMAKE_C_FLAGS_INIT   "${_ps4_common}")
-set(CMAKE_CXX_FLAGS_INIT "${_ps4_common} -isystem ${OO_PS4_TOOLCHAIN}/include/c++/v1 -fexceptions -fcxx-exceptions")
+# Kodi uses C++20 ranges and constexpr library support. The OpenOrbis release
+# still ships libc++ 11 headers, so CI provides LLVM 18 headers while retaining
+# the OpenOrbis libc++ runtime (ABI version 1).
+set(PS4_LIBCXX_INCLUDE_DIR "${OO_PS4_TOOLCHAIN}/include/c++/v1")
+if(EXISTS "/usr/lib/llvm-18/include/c++/v1/ranges")
+  set(PS4_LIBCXX_INCLUDE_DIR "/usr/lib/llvm-18/include/c++/v1")
+endif()
+set(CMAKE_CXX_FLAGS_INIT "${_ps4_common} -isystem ${PS4_LIBCXX_INCLUDE_DIR} -isystem ${OO_PS4_TOOLCHAIN}/include/c++/v1 -D_LIBCPP_HAS_MUSL_LIBC -fexceptions -fcxx-exceptions")
 
 # Executables: PIE, Sony linker script, our libc, Sony stub libraries.
 set(CMAKE_EXE_LINKER_FLAGS_INIT

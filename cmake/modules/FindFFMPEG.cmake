@@ -177,6 +177,12 @@ macro(buildFFMPEG)
       set(extra_env_vars "SDKROOT=")
     endif()
 
+    set(FFMPEG_C_FLAGS "${CMAKE_C_FLAGS}")
+    if(CORE_SYSTEM_NAME STREQUAL "ps4")
+      # Prefer the OpenSSL 3 headers built for PS4 over SDK headers.
+      set(FFMPEG_C_FLAGS "-I${DEPENDS_PATH}/include ${FFMPEG_C_FLAGS}")
+    endif()
+
     set(CMAKE_ARGS -DCMAKE_MODULE_PATH=${FFMPEG_MODULE_PATH}
                    -DFFMPEG_VER=${FFMPEG_VER}
                    -DCORE_SYSTEM_NAME=${CORE_SYSTEM_NAME}
@@ -186,7 +192,7 @@ macro(buildFFMPEG)
                    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
                    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                    -DENABLE_CCACHE=${ENABLE_CCACHE}
-                   -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+                   "-DCMAKE_C_FLAGS=${FFMPEG_C_FLAGS}"
                    -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
                    "-DCMAKE_EXE_LINKER_FLAGS=${LINKER_FLAGS}"
                    -DDISABLE_FFMPEG_SOURCE_PLUGINS=${DISABLE_FFMPEG_SOURCE_PLUGINS}

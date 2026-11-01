@@ -30,6 +30,22 @@ cmake -S "$root/tools/depends/native/TexturePacker/src" -B "$host_tools" \
   -DCMAKE_BUILD_TYPE=Release -DKODI_SOURCE_DIR="$root" -DARCH_DEFINES=-DTARGET_POSIX
 cmake --build "$host_tools" --parallel "${PS4_BUILD_JOBS:-2}"
 
+# Kodi also builds host executables (flatc and JsonSchemaBuilder) during the
+# cross-build. Give those ExternalProjects an explicit native compiler.
+native_prefix="$root/ps4/build/native-tools"
+mkdir -p "$native_prefix/share"
+cat > "$native_prefix/share/Toolchain-Native.cmake" <<'EOF'
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_C_COMPILER /usr/bin/cc)
+set(CMAKE_CXX_COMPILER /usr/bin/c++)
+set(CMAKE_AR /usr/bin/ar)
+set(CMAKE_RANLIB /usr/bin/ranlib)
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
+EOF
+
 # Install the PS4 platform sources before CMake scans the Kodi tree.
 cp -a "$root/ps4/overlay/xbmc/platform/ps4" "$root/xbmc/platform/"
 
@@ -41,8 +57,9 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DCMAKE_PREFIX_PATH="$prefix;$OO_PS4_TOOLCHAIN" \
   -DDEPENDS_DIR="$prefix" \
   -DDEPENDS_PATH="$prefix" \
+  -DNATIVEPREFIX="$native_prefix" \
   -DENABLE_TESTING=OFF \
-  -DENABLE_OPTICAL=OFF \
+  -DENABLE_OPTICAL=ON \
   -DENABLE_PYTHON=OFF \
   -DENABLE_CEC=OFF \
   -DENABLE_INTERNAL_BLURAY=OFF \

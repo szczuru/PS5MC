@@ -10,7 +10,7 @@
      if (NOT LIBUUID_FOUND)
 --- a/src/guid.cpp
 +++ b/src/guid.cpp
-@@ -26,9 +26,13 @@
+@@ -26,9 +26,15 @@
  #include "crossguid/guid.hpp"
  
  #ifdef GUID_LIBUUID
@@ -18,13 +18,15 @@
  #endif
 +
 +#ifdef GUID_PS4
-+#include <stdlib.h>
++#include <cerrno>
++#include <fcntl.h>
++#include <unistd.h>
 +#endif
  
  #ifdef GUID_CFUUID
  #include <CoreFoundation/CFUUID.h>
  #endif
-@@ -279,5 +279,16 @@
+@@ -279,5 +279,32 @@
  }
  #endif
  
@@ -32,7 +34,23 @@
 +Guid newGuid()
 +{
 +	std::array<unsigned char, 16> data;
-+	arc4random_buf(data.data(), data.size());
++	int fd = open("/dev/urandom", O_RDONLY);
++	if (fd < 0)
++		throw std::runtime_error("Unable to open /dev/urandom for GUID generation");
++	size_t offset = 0;
++	while (offset < data.size())
++	{
++		ssize_t count = read(fd, data.data() + offset, data.size() - offset);
++		if (count < 0 && errno == EINTR)
++			continue;
++		if (count <= 0)
++		{
++			close(fd);
++			throw std::runtime_error("Unable to read /dev/urandom for GUID generation");
++		}
++		offset += static_cast<size_t>(count);
++	}
++	close(fd);
 +	data[6] = static_cast<unsigned char>((data[6] & 0x0f) | 0x40);
 +	data[8] = static_cast<unsigned char>((data[8] & 0x3f) | 0x80);
 +	return Guid{std::move(data)};

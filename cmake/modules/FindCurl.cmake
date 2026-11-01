@@ -32,6 +32,9 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
     if(WIN32 OR WINDOWS_STORE)
       set(${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_C_FLAGS -DNGHTTP2_STATICLIB)
       set(${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_LINK_LIBRARIES crypt32.lib)
+    elseif(CORE_SYSTEM_NAME STREQUAL "ps4")
+      # OpenOrbis exposes the socket option as IPPROTO_IP, not SOL_IP.
+      set(${CMAKE_FIND_PACKAGE_NAME}_C_FLAGS "-DSOL_IP=IPPROTO_IP")
     endif()
 
     set(CMAKE_ARGS -DBUILD_CURL_EXE=OFF
@@ -56,6 +59,7 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                    -DCURL_USE_LIBPSL=OFF
                    -DCURL_USE_GSSAPI=OFF
                    -DCURL_CA_FALLBACK=ON
+                   -DCMAKE_C_FLAGS=${${CMAKE_FIND_PACKAGE_NAME}_C_FLAGS}
                    ${OPTIONAL_ARGS})
 
     BUILD_DEP_TARGET()

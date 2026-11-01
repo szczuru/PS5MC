@@ -283,12 +283,21 @@ static void probe_piglet(void)
         return;
     }
 
+    snprintf(path, sizeof(path), "/%s/common/lib/libScePrecompiledShaders.sprx",
+             sw ? sw : "");
+    uint32_t shader_h = sceKernelLoadStartModule(path, 0, NULL, 0, NULL, &ms);
+    ps4log("  load PrecompiledShaders: 0x%08x", shader_h);
+    if ((int32_t)shader_h < 0 && shader_h != 0x80020008u) {
+        ps4log("  PrecompiledShaders load failed – przerywam Piglet init");
+        return;
+    }
+
     OrbisPglConfig cfg;
     memset(&cfg, 0, sizeof(cfg));
     cfg.size = sizeof(cfg);
     cfg.processOrder = 1;
     cfg.flags = ORBIS_PGL_FLAGS_USE_COMPOSITE_EXT |
-                ORBIS_PGL_FLAGS_USE_FLEXIBLE_MEMORY;
+                ORBIS_PGL_FLAGS_USE_FLEXIBLE_MEMORY | 0x60;
     cfg.systemSharedMemorySize  = 128ull * 1024 * 1024;
     cfg.videoSharedMemorySize   = 256ull * 1024 * 1024;
     cfg.maxMappedFlexibleMemory =  64ull * 1024 * 1024;
@@ -297,7 +306,11 @@ static void probe_piglet(void)
     cfg.dbgPosCmd_0x40 = 1920;
     cfg.dbgPosCmd_0x44 = 1080;
     cfg.unk_0x5C = 2;
-    scePigletSetConfigurationVSH(&cfg);
+    int cfg_result = scePigletSetConfigurationVSH(&cfg);
+    ps4log("  scePigletSetConfigurationVSH: 0x%08x",
+           (uint32_t)cfg_result);
+    if (cfg_result < 0)
+        return;
 
     EGLDisplay dpy = eglGetDisplay(0);
     ps4log("  eglGetDisplay(0): %s",

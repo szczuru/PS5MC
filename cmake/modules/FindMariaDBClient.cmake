@@ -75,6 +75,12 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                                -DCLIENT_PLUGIN_MYSQL_OLD_PASSWORD=STATIC
                                -DCLIENT_PLUGIN_CLIENT_ED25519=STATIC)
 
+    # The PS4 libc/toolchain does not provide the Ed25519 plugin's required
+    # hash context API. This uncommon authentication method is not needed by Kodi.
+    if(CORE_SYSTEM_NAME STREQUAL "ps4")
+      list(APPEND CLIENT_PLUGINS -DCLIENT_PLUGIN_CLIENT_ED25519=OFF)
+    endif()
+
     # Disable GSSAPI authentication plugin (not widely used by Kodi users)
     list(APPEND CLIENT_PLUGINS -DCLIENT_PLUGIN_AUTH_GSSAPI_CLIENT=OFF)
 
