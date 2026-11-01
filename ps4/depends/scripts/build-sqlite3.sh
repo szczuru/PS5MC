@@ -44,7 +44,7 @@ if ! ./configure \
 fi
 
 make -j2 libsqlite3.la
-make install-libdir install-include
+make install
 test -f "$PS4_PREFIX/lib/libsqlite3.a"
 test -f "$PS4_PREFIX/include/sqlite3.h"
 echo "sqlite3 OK -> $PS4_PREFIX/lib/libsqlite3.a"
