@@ -7,17 +7,17 @@ set(GL_INTERFACES_LIST "VideoOut;egl")
 # OpenOrbis exposes EGL and GLES through Piglet's VSH library rather than the
 # desktop library names searched by Kodi's generic find modules.
 list(APPEND PLATFORM_REQUIRED_DEPS OpenGLES EGL)
-if(NOT TARGET ${APP_NAME_LC}::OpenGLES)
-  add_library(${APP_NAME_LC}::OpenGLES INTERFACE IMPORTED GLOBAL)
-  set_target_properties(${APP_NAME_LC}::OpenGLES PROPERTIES
+if(NOT TARGET kodi::OpenGLES)
+  add_library(kodi::OpenGLES INTERFACE IMPORTED GLOBAL)
+  set_target_properties(kodi::OpenGLES PROPERTIES
     INTERFACE_LINK_LIBRARIES "-lScePigletv2VSH"
     INTERFACE_INCLUDE_DIRECTORIES "${OO_PS4_TOOLCHAIN}/include"
     INTERFACE_COMPILE_DEFINITIONS "HAS_GLES=1;__PIGLET__=1")
 endif()
-if(NOT TARGET ${APP_NAME_LC}::EGL)
-  add_library(${APP_NAME_LC}::EGL INTERFACE IMPORTED GLOBAL)
-  set_target_properties(${APP_NAME_LC}::EGL PROPERTIES
-    INTERFACE_LINK_LIBRARIES "${APP_NAME_LC}::OpenGLES"
+if(NOT TARGET kodi::EGL)
+  add_library(kodi::EGL INTERFACE IMPORTED GLOBAL)
+  set_target_properties(kodi::EGL PROPERTIES
+    INTERFACE_LINK_LIBRARIES "kodi::OpenGLES"
     INTERFACE_INCLUDE_DIRECTORIES "${OO_PS4_TOOLCHAIN}/include"
     INTERFACE_COMPILE_DEFINITIONS "HAS_EGL=1;__PIGLET__=1")
 endif()
