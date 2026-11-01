@@ -28,14 +28,16 @@ fi
 
 cd "$SRC"
 
-# Hand-write a minimal Makefile to avoid broken configure detection under cross
+# Only core compression objects – skip gz* (needs full unistd: lseek/read/close)
+# This is enough for FFmpeg, libpng, freetype, curl, Kodi.
 cat > Makefile.ps4 << MAKE
 CC = $CC
-CFLAGS = $CFLAGS -DNO_FSEEKO -DNO_STRERROR -DHAVE_HIDDEN
+CFLAGS = $CFLAGS -DNO_FSEEKO -DNO_STRERROR -DHAVE_HIDDEN -DNO_GZCOMPRESS
 AR = $AR
 RANLIB = $RANLIB
 
-OBJS = adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o compress.o uncompr.o gzclose.o gzlib.o gzread.o gzwrite.o
+# Core only (no gzlib/gzread/gzwrite/gzclose)
+OBJS = adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o compress.o uncompr.o
 
 all: libz.a
 
