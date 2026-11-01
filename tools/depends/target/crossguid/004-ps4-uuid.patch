@@ -1,0 +1,43 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -29,5 +29,7 @@ elseif(ANDROID)
+     # GUID_ANDROID is used in the headers, so make PUBLIC
+     target_compile_definitions(crossguid PUBLIC GUID_ANDROID)
++elseif(PS4)
++    target_compile_definitions(crossguid PRIVATE GUID_PS4)
+ else()
+     find_package(Libuuid REQUIRED)
+     if (NOT LIBUUID_FOUND)
+--- a/src/guid.cpp
++++ b/src/guid.cpp
+@@ -26,9 +26,13 @@
+ #include "crossguid/guid.hpp"
+ 
+ #ifdef GUID_LIBUUID
+ #include <uuid/uuid.h>
+ #endif
++
++#ifdef GUID_PS4
++#include <stdlib.h>
++#endif
+ 
+ #ifdef GUID_CFUUID
+ #include <CoreFoundation/CFUUID.h>
+ #endif
+@@ -279,5 +279,16 @@
+ }
+ #endif
+ 
++#ifdef GUID_PS4
++Guid newGuid()
++{
++	std::array<unsigned char, 16> data;
++	arc4random_buf(data.data(), data.size());
++	data[6] = static_cast<unsigned char>((data[6] & 0x0f) | 0x40);
++	data[8] = static_cast<unsigned char>((data[8] & 0x3f) | 0x80);
++	return Guid{std::move(data)};
++}
++#endif
++
+ // this is the mac and ios version
+ #ifdef GUID_CFUUID
