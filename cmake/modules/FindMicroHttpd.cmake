@@ -33,12 +33,17 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
       endif()
       find_program(MAKE_EXECUTABLE make REQUIRED)
 
+      set(MICROHTTPD_HTTPS_OPTION --enable-https)
+      if(PS4)
+        set(MICROHTTPD_HTTPS_OPTION --disable-https)
+      endif()
+
       set(CONFIGURE_COMMAND ./configure --prefix ${DEPENDS_PATH}
                                         --disable-shared
                                         --disable-doc
                                         --disable-examples
                                         --disable-curl
-                                        --enable-https
+                                        ${MICROHTTPD_HTTPS_OPTION}
                                         ${EXTRA_ARGS})
 
       set(BUILD_COMMAND ${MAKE_EXECUTABLE})

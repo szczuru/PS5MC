@@ -9,6 +9,7 @@ on:
       - 'cmake/platform/ps4/**'
       - 'cmake/scripts/ps4/**'
       - 'cmake/treedata/ps4/**'
+      - 'cmake/modules/FindMicroHttpd.cmake'
       - 'cmake/modules/buildtools/FindTexturePacker.cmake'
       - '.github/workflows/ps4-build.yml'
 
