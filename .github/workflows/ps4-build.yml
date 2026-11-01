@@ -11,6 +11,7 @@ on:
       - 'cmake/treedata/ps4/**'
       - 'cmake/modules/FindMicroHttpd.cmake'
       - 'cmake/modules/FindCrossGUID.cmake'
+      - 'cmake/modules/FindCurl.cmake'
       - 'cmake/modules/buildtools/FindTexturePacker.cmake'
       - 'tools/depends/target/crossguid/**'
       - '.github/workflows/ps4-build.yml'

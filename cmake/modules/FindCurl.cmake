@@ -45,6 +45,9 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                    -DCURL_DISABLE_SMB=OFF
                    -DCURL_USE_OPENSSL=ON
                    -DOPENSSL_ROOT_DIR=${DEPENDS_PATH}
+                   -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
+                   -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
+                   -DOPENSSL_SSL_LIBRARY=${OPENSSL_SSL_LIBRARY}
                    -DCURL_BROTLI=ON
                    -DCURL_ZSTD=OFF
                    -DUSE_NGHTTP2=ON
