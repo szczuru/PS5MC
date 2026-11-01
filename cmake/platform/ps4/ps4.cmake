@@ -24,4 +24,4 @@ endif()
 set(OpenGLES_FOUND TRUE)
 set(EGL_FOUND TRUE)
 
-list(APPEND PLATFORM_OPTIONAL_DEPS_EXCLUDE "^(Bluray|Udfread|XSLT)$" "MicroHttpd")
+list(APPEND PLATFORM_OPTIONAL_DEPS_EXCLUDE "^(Bluray|Udfread|XSLT|MariaDBClient|MySqlClient|MicroHttpd)$")
