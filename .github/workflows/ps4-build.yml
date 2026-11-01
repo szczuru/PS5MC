@@ -12,6 +12,7 @@ on:
       - 'cmake/modules/FindMicroHttpd.cmake'
       - 'cmake/modules/FindCrossGUID.cmake'
       - 'cmake/modules/FindCurl.cmake'
+      - 'cmake/modules/FindExiv2.cmake'
       - 'cmake/modules/buildtools/FindTexturePacker.cmake'
       - 'tools/depends/target/crossguid/**'
       - '.github/workflows/ps4-build.yml'
