@@ -17,6 +17,7 @@ stage="$root/ps4/build/kodi-stage"
 "$root/ps4/scripts/00-fetch-toolchain.sh"
 "$root/ps4/scripts/build-depends.sh"
 "$root/ps4/depends/scripts/build-harfbuzz.sh"
+"$root/ps4/depends/scripts/build-fribidi.sh"
 
 # TexturePacker runs on the build host while generating Kodi skin assets.
 host_tools="$root/ps4/build/host-texturepacker"
