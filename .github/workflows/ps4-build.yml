@@ -68,16 +68,73 @@ jobs:
           path: dist/probe/*.pkg
           if-no-files-found: error
 
-  # Etap M4 – pełny Kodi. Odblokować gdy ps4/scripts/build-kodi.sh będzie gotowe.
+  depends:
+    name: M3 – depends (zlib, png, freetype, openssl, curl, ffmpeg)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ps4
+            .github
+          sparse-checkout-cone-mode: false
+
+      - name: Narzędzia systemu
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang lld-18 cmake ninja-build curl git python3 \
+            pkg-config autoconf automake libtool nasm yasm
+          sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
+          sudo ln -sf /usr/bin/clang-18 /usr/bin/clang || true
+
+      - name: Cache toolchain OpenOrbis
+        uses: actions/cache@v4
+        with:
+          path: ~/OpenOrbis
+          key: openorbis-v0.5.4-llvm18
+
+      - name: Cache depends prefix
+        uses: actions/cache@v4
+        with:
+          path: ps4/depends/prefix
+          key: ps4-depends-${{ hashFiles('ps4/depends/scripts/*.sh') }}
+
+      - name: Uprawnienia skryptów
+        run: |
+          chmod +x ps4/scripts/*.sh
+          chmod +x ps4/depends/scripts/*.sh
+
+      - name: Pobierz toolchain
+        run: bash ps4/scripts/00-fetch-toolchain.sh
+
+      - name: Buduj depends (M3)
+        run: bash ps4/scripts/build-depends.sh
+
+      - name: Pokaż wynik
+        run: |
+          echo "=== prefix/lib ==="
+          ls -la ps4/depends/prefix/lib || true
+          echo "=== prefix/include ==="
+          ls ps4/depends/prefix/include || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps4mc-depends-prefix
+          path: ps4/depends/prefix
+          if-no-files-found: warn
+
+  # Etap M4 – pełny Kodi. Odblokować gdy build-kodi.sh będzie gotowe i depends przejdzie.
   kodi:
-    name: Kodi (PS4MC) → PKG  [nieaktywne – czeka na M2/M3]
+    name: Kodi (PS4MC) → PKG  [nieaktywne – czeka na M3]
     if: false
+    needs: [depends]
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
       - name: Narzędzia
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang lld cmake ninja-build curl git python3 libssl-dev pkg-config nasm
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang lld-18 cmake ninja-build curl git python3 libssl-dev pkg-config nasm
       - name: libssl1.1
         run: |
           curl -fsSL -o /tmp/libssl1.1.deb \
@@ -91,8 +148,7 @@ jobs:
       - name: Pobierz toolchain
         run: bash ps4/scripts/00-fetch-toolchain.sh
       - name: Uprawnienia skryptów
-        run: chmod +x ps4/scripts/*.sh
-
+        run: chmod +x ps4/scripts/*.sh ps4/depends/scripts/*.sh
       - name: Buduj Kodi
         run: bash ps4/scripts/build-kodi.sh "$GITHUB_WORKSPACE/dist/kodi"
       - uses: actions/upload-artifact@v4
