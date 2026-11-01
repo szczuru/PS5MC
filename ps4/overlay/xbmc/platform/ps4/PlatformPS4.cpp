@@ -16,7 +16,7 @@ bool CPlatformPS4::InitStageOne()
 
   sceUserServiceInitialize(nullptr);
 
-  return CPlatform::InitStageOne();
+  return CPlatformPosix::InitStageOne();
 }
 
 bool CPlatformPS4::InitStageTwo()
@@ -25,15 +25,15 @@ bool CPlatformPS4::InitStageTwo()
   return CPlatform::InitStageTwo();
 }
 
-void CPlatformPS4::Deinit()
+void CPlatformPS4::DeinitStageOne()
 {
-  CLog::Log(LOGINFO, "PS4: Deinit");
+  CLog::Log(LOGINFO, "PS4: DeinitStageOne");
   PS4Privileges::Drop();
-  CPlatform::Deinit();
+  CPlatformPosix::DeinitStageOne();
 }
 
 // Factory used by Kodi
-std::unique_ptr<CPlatform> CPlatform::CreateInstance()
+CPlatform* CPlatform::CreateInstance()
 {
-  return std::make_unique<CPlatformPS4>();
+  return new CPlatformPS4();
 }
