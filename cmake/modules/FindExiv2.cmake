@@ -16,6 +16,10 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
 
     # Patch pending review upstream (https://github.com/Exiv2/exiv2/pull/3004)
     set(patches "${CMAKE_SOURCE_DIR}/tools/depends/target/${${CMAKE_FIND_PACKAGE_NAME}_MODULE_LC}/0001-WIN-lib-postfix.patch")
+    if(CORE_SYSTEM_NAME STREQUAL "ps4")
+      list(APPEND patches
+           "${CMAKE_SOURCE_DIR}/tools/depends/target/${${CMAKE_FIND_PACKAGE_NAME}_MODULE_LC}/0002-PS4-no-freebsd-procstat.patch")
+    endif()
 
     generate_patchcommand("${patches}")
     unset(patches)

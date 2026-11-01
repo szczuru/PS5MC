@@ -35,6 +35,7 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                    -DSPDLOG_BUILD_EXAMPLE=OFF
                    -DSPDLOG_BUILD_TESTS=OFF
                    -DSPDLOG_BUILD_BENCH=OFF
+                   -DSPDLOG_NO_THREAD_ID=ON
                    -DSPDLOG_FMT_EXTERNAL=ON
                    ${EXTRA_ARGS})
   
