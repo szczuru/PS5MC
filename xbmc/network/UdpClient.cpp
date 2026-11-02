@@ -11,6 +11,10 @@
 #include <mutex>
 #ifdef TARGET_POSIX
 #include <sys/ioctl.h>
+#if defined(TARGET_PS4)
+#include <sys/filio.h>
+#include <sys/sockio.h>
+#endif
 #endif
 #include "Network.h"
 #include "utils/TimeUtils.h"

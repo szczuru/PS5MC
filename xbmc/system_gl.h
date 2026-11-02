@@ -41,3 +41,30 @@
 #endif
 #endif
 #endif
+
+// OpenOrbis ships GLES 2.0 headers. Kodi also compiles GLES 3 code paths that
+// are guarded at runtime; provide the standard enum values so those paths can
+// be built while the PS4 renderer requests an ES 2 context.
+#if defined(TARGET_PS4) && HAS_GLES == 2
+#ifndef GL_RED
+#define GL_RED 0x1903
+#endif
+#ifndef GL_GREEN
+#define GL_GREEN 0x1904
+#endif
+#ifndef GL_BLUE
+#define GL_BLUE 0x1905
+#endif
+#ifndef GL_RG
+#define GL_RG 0x8227
+#endif
+#ifndef GL_R16F
+#define GL_R16F 0x822D
+#endif
+#ifndef GL_RGBA32F
+#define GL_RGBA32F 0x8814
+#endif
+#ifndef GL_SRGB8_ALPHA8
+#define GL_SRGB8_ALPHA8 0x8C43
+#endif
+#endif

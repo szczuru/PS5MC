@@ -15,6 +15,9 @@
 #elif defined(TARGET_DARWIN) || defined(TARGET_FREEBSD)
 #include <sys/param.h>
 #include <sys/mount.h>
+#if defined(TARGET_PS4)
+#include <sys/statfs.h>
+#endif
 #elif defined(TARGET_ANDROID)
 #include <sys/statfs.h>
 #endif

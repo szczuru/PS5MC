@@ -6,7 +6,6 @@ set(SOURCES
   CPUInfoPS4.cpp
   MemUtils.cpp
   VideoOutInfo.cpp
-  PS4InterfaceForCLog.cpp
   ${CMAKE_SOURCE_DIR}/ps4/src/PS4Privileges.cpp
 )
 
@@ -14,7 +13,6 @@ set(HEADERS
   PlatformPS4.h
   CPUInfoPS4.h
   VideoOutInfo.h
-  PS4InterfaceForCLog.h
   ${CMAKE_SOURCE_DIR}/ps4/src/PS4Privileges.h
 )
 

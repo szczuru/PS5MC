@@ -2,6 +2,7 @@
 // Minimal sink using the working PERSONAL port from probe v12
 
 #include "AESinkPS4.h"
+#include "cores/AudioEngine/AESinkFactory.h"
 #include "utils/log.h"
 
 #include <orbis/AudioOut.h>
@@ -31,7 +32,7 @@ void CAESinkPS4::EnumerateDevicesEx(AEDeviceInfoList& list, bool /*force*/)
 {
   CAEDeviceInfo info;
   info.m_deviceName = "PERSONAL";
-  info.m_displayName = "PS4 Audio (PERSONAL)";
+  info.m_displayName = "PS4 Audio";
   info.m_displayNameExtra = "sceAudioOut";
   info.m_deviceType = AE_DEVTYPE_PCM;
   info.m_channels += AE_CH_FL;
@@ -50,7 +51,7 @@ bool CAESinkPS4::Initialize(AEAudioFormat& format, std::string& /*device*/)
   sceUserServiceGetInitialUser(&user);
 
   // PERSONAL port worked in probe
-  m_port = sceAudioOutOpen(user, 2 /* PERSONAL */, 0,
+  m_port = sceAudioOutOpen(user, ORBIS_AUDIO_OUT_PORT_TYPE_MAIN, 0,
                            512, 48000,
                            ORBIS_AUDIO_OUT_PARAM_FORMAT_S16_STEREO);
   if (m_port < 0)

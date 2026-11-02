@@ -1466,6 +1466,8 @@ std::string CSysInfo::GetBuildTargetPlatformVersionDecoded(void)
   static const int minor = (std::stoi(versionStr) / 100) % 100;
   static const int rev = std::stoi(versionStr) % 100;
   return StringUtils::Format("version {}.{}.{}", major, minor, rev);
+#elif defined(TARGET_PS4)
+  return "PS4";
 #elif defined(TARGET_FREEBSD)
   // FIXME: should works well starting from FreeBSD 8.1
   static const int major = (__FreeBSD_version / 100000) % 100;
