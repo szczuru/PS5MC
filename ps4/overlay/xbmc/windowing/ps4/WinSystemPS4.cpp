@@ -1,4 +1,5 @@
 #include "WinSystemPS4.h"
+#include "platform/ps4/input/PS4PadInput.h"
 
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 #include "cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h"
@@ -21,6 +22,8 @@ CWinSystemPS4::CWinSystemPS4()
   : KODI::WINDOWING::LINUX::CWinSystemEGL(EGL_NONE, "")
 {
 }
+
+CWinSystemPS4::~CWinSystemPS4() = default;
 
 void CWinSystemPS4::Register()
 {
@@ -110,11 +113,24 @@ bool CWinSystemPS4::InitWindowSystem()
     return false;
   }
   CLog::Log(LOGINFO, "PS4: Piglet EGL/GLES2 initialized");
+
+  m_padInput = std::make_unique<CPS4PadInput>();
+  if (!m_padInput->Initialize())
+  {
+    CLog::Log(LOGERROR, "PS4: controller input initialization failed");
+    m_padInput.reset();
+    return false;
+  }
   return true;
 }
 
 bool CWinSystemPS4::DestroyWindowSystem()
 {
+  if (m_padInput)
+  {
+    m_padInput->Deinitialize();
+    m_padInput.reset();
+  }
   DestroyWindow();
   m_eglContext.Destroy();
   VIDEOPLAYER::CRendererFactory::ClearRenderer();

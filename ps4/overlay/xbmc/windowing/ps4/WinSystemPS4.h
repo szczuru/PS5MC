@@ -8,6 +8,8 @@
 
 #include <memory>
 
+class CPS4PadInput;
+
 namespace KODI::WINDOWING::PS4
 {
 
@@ -17,7 +19,7 @@ class CWinSystemPS4 final : public CWinSystemBase,
 {
 public:
   CWinSystemPS4();
-  ~CWinSystemPS4() override = default;
+  ~CWinSystemPS4() override;
 
   static void Register();
   static std::unique_ptr<CWinSystemBase> CreateWinSystem();
@@ -45,6 +47,7 @@ private:
   bool CreateContext();
 
   OrbisPglWindow m_nativeWindow{};
+  std::unique_ptr<CPS4PadInput> m_padInput;
 };
 
 } // namespace KODI::WINDOWING::PS4
