@@ -152,7 +152,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Narzędzia
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang lld-18 llvm libc++-18-dev cmake ninja-build curl git python3 libssl-dev pkg-config nasm autoconf automake libtool libtool-bin meson liblzo2-dev libpng-dev libgif-dev libjpeg-dev
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang lld-18 llvm libc++-18-dev cmake ninja-build ccache curl git python3 libssl-dev pkg-config nasm autoconf automake libtool libtool-bin meson liblzo2-dev libpng-dev libgif-dev libjpeg-dev
       - name: libssl1.1
         run: |
           curl -fsSL -o /tmp/libssl1.1.deb \
@@ -163,6 +163,14 @@ jobs:
         with:
           path: ~/OpenOrbis
           key: openorbis-v0.5.4-llvm18
+      - name: Cache kompilacji ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ps4-ccache-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ps4-ccache-${{ runner.os }}-${{ github.ref_name }}-
+            ps4-ccache-${{ runner.os }}-
       - name: Cache zależności M3
         uses: actions/cache@v4
         with:
@@ -180,7 +188,12 @@ jobs:
       - name: Uprawnienia skryptów
         run: chmod +x ps4/scripts/*.sh ps4/depends/scripts/*.sh
       - name: Buduj Kodi
-        run: bash ps4/scripts/build-kodi.sh "$GITHUB_WORKSPACE/dist/kodi"
+        run: |
+          ccache --max-size=500M
+          bash ps4/scripts/build-kodi.sh "$GITHUB_WORKSPACE/dist/kodi"
+      - name: Statystyki ccache
+        if: always()
+        run: ccache --show-stats || true
       - uses: actions/upload-artifact@v4
         with:
           name: ps4mc-kodi-pkg
