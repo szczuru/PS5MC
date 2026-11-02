@@ -188,6 +188,8 @@ if(CMAKE_C_FLAGS MATCHES "__PS4__" OR CMAKE_CXX_FLAGS MATCHES "__PS4__"
   # Kodi's patch series can restore FFmpeg's OpenSSL/GPL probe. Run after it.
   list(APPEND sourceplugin_patch COMMAND python3
        ${PROJECTSOURCE}/ps4/scripts/patch-ffmpeg-configure-openssl.py <SOURCE_DIR>/configure)
+  list(APPEND sourceplugin_patch COMMAND python3
+       ${PROJECTSOURCE}/ps4/scripts/patch-ffmpeg-ps4-cpu.py <SOURCE_DIR>/libavutil/cpu.c)
 endif()
 
 include(ExternalProject)
