@@ -7,6 +7,7 @@ on:
     paths:
       - 'ps4/**'
       - 'cmake/platform/ps4/**'
+      - 'xbmc/platform/posix/PosixMountProvider.cpp'
       - 'cmake/scripts/ps4/**'
       - 'cmake/treedata/ps4/**'
       - 'cmake/modules/FindMicroHttpd.cmake'
