@@ -29,7 +29,9 @@
 
 #elif defined(TARGET_FREEBSD)
 #include <stdio.h>
+#if !defined(TARGET_PS4)
 #include <sys/sysctl.h>
+#endif
 #else
 #include <sys/sysinfo.h>
 #endif

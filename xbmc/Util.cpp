@@ -12,7 +12,7 @@
 #include <sys/param.h>
 #endif
 
-#ifdef TARGET_FREEBSD
+#if defined(TARGET_FREEBSD) && !defined(TARGET_PS4)
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #endif
@@ -1823,6 +1823,8 @@ std::string CUtil::ResolveExecutablePath()
 
   CDarwinUtils::GetExecutablePath(given_path, &path_size);
   strExecutablePath = given_path;
+#elif defined(TARGET_PS4)
+  strExecutablePath = "/app0/eboot.bin";
 #elif defined(TARGET_FREEBSD)
   char buf[PATH_MAX];
   size_t buflen;

@@ -19,3 +19,6 @@ set(HEADERS
 )
 
 core_add_library(platform_ps4)
+target_link_libraries(platform_ps4 PRIVATE
+  ${CMAKE_SOURCE_DIR}/ps4/libXcape/lib/libXcape.a
+)

@@ -38,6 +38,8 @@ public:
   bool CanDoWindowed() override { return false; }
   bool SupportsScreenMove() override { return false; }
   bool HasCursor() override { return false; }
+  void Register(IDispResource* resource) override {}
+  void Unregister(IDispResource* resource) override {}
 
 protected:
   void SetVSyncImpl(bool enable) override;
