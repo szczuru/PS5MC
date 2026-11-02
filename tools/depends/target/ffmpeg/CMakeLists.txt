@@ -59,6 +59,12 @@ if(CMAKE_EXE_LINKER_FLAGS)
   list(APPEND ffmpeg_conf --extra-ldflags=${CMAKE_EXE_LINKER_FLAGS})
 endif()
 
+# OpenOrbis links with -nostdlib. FFmpeg's configure link checks (including
+# OpenSSL detection) therefore need the PS4 runtime libraries as trailing libs.
+if(CORE_SYSTEM_NAME STREQUAL ps4)
+  list(APPEND ffmpeg_conf "--extra-libs=-lkernel -lc -lm")
+endif()
+
 if(ENABLE_NEON)
   list(APPEND ffmpeg_conf --enable-neon)
 endif()
