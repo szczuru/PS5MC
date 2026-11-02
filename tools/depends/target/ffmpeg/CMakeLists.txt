@@ -2,15 +2,21 @@ project(ffmpeg)
 
 cmake_minimum_required(VERSION 3.12)
 
-if(ENABLE_CCACHE AND CCACHE_PROGRAM)
-  set(ffmpeg_conf "--cc=${CCACHE_PROGRAM} ${CMAKE_C_COMPILER}"
-                  "--cxx=${CCACHE_PROGRAM} ${CMAKE_CXX_COMPILER}"
-                )
-else()
-  set(ffmpeg_conf --cc=${CMAKE_C_COMPILER}
-                  --cxx=${CMAKE_CXX_COMPILER}
-                )
+set(ffmpeg_cc "${CMAKE_C_COMPILER}")
+set(ffmpeg_cxx "${CMAKE_CXX_COMPILER}")
+if(CMAKE_C_COMPILER_TARGET)
+  string(APPEND ffmpeg_cc " --target=${CMAKE_C_COMPILER_TARGET}")
 endif()
+if(CMAKE_CXX_COMPILER_TARGET)
+  string(APPEND ffmpeg_cxx " --target=${CMAKE_CXX_COMPILER_TARGET}")
+endif()
+
+if(ENABLE_CCACHE AND CCACHE_PROGRAM)
+  set(ffmpeg_cc "${CCACHE_PROGRAM} ${ffmpeg_cc}")
+  set(ffmpeg_cxx "${CCACHE_PROGRAM} ${ffmpeg_cxx}")
+endif()
+
+set(ffmpeg_conf "--cc=${ffmpeg_cc}" "--cxx=${ffmpeg_cxx}")
 
 set(env_vars ${EXTRA_ENV_VARS})
 
