@@ -8,7 +8,7 @@ set(ARCH_DEFINES
   -DTARGET_FREEBSD
   -DTARGET_PS4
   -D__PS4__
-  -DHAS_GLES=1
+  -DHAS_GLES=2
   -DHAS_EGL=0          # Piglet eglGetDisplay fails for now – using VideoOut path
 )
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <orbis/Pigletv2VSH.h>
 
 #include "rendering/gles/RenderSystemGLES.h"

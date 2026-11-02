@@ -109,7 +109,7 @@ CPS4PadInput::~CPS4PadInput()
 
 bool CPS4PadInput::Initialize()
 {
-  const int result = scePadInit();
+  int result = scePadInit();
   if (result != 0)
   {
     CLog::Log(LOGERROR, "PS4Pad: scePadInit failed: {:#x}", static_cast<uint32_t>(result));
