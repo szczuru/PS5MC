@@ -60,9 +60,14 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
           set(DISABLE_ASM "--disable-asm")
       endif()
 
+      if(PS4)
+        set(ASS_HOST_ARG --host=x86_64-pc-freebsd)
+      endif()
+
       set(CONFIGURE_COMMAND ${AUTORECONF} -vif
                     COMMAND ./configure
                               --prefix=${DEPENDS_PATH}
+                              ${ASS_HOST_ARG}
                               --disable-shared
                               --disable-libunibreak
                               --enable-fontconfig
@@ -71,9 +76,25 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
       set(BUILD_COMMAND ${MAKE_EXECUTABLE})
       set(INSTALL_COMMAND ${MAKE_EXECUTABLE} install)
       set(BUILD_IN_SOURCE 1)
+
+      # libass uses autotools rather than CMake, so it does not inherit the
+      # compiler target and sysroot from the Kodi toolchain automatically.
+      # Without this environment configure silently selects the host GCC and
+      # produces a Linux archive that cannot be linked into the PS4 executable.
+      if(PS4)
+        set(DEP_BUILDENV "${CMAKE_COMMAND}" -E env
+            "CC=${CMAKE_C_COMPILER} --target=${PS4_TRIPLE}"
+            "CXX=${CMAKE_CXX_COMPILER} --target=${PS4_TRIPLE}"
+            "AR=${CMAKE_AR}"
+            "RANLIB=${CMAKE_RANLIB}"
+            "CFLAGS=${CMAKE_C_FLAGS}"
+            "CXXFLAGS=${CMAKE_CXX_FLAGS}")
+      endif()
     endif()
 
     BUILD_DEP_TARGET()
+    unset(DEP_BUILDENV)
+    unset(ASS_HOST_ARG)
 
     # Link libraries for target interface
     set(${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_LINK_LIBRARIES ${APP_NAME_LC}::FriBidi ${APP_NAME_LC}::Iconv ${APP_NAME_LC}::HarfBuzz ${APP_NAME_LC}::FreeType)

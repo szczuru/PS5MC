@@ -22,6 +22,7 @@ on:
       - 'cmake/modules/FindCurl.cmake'
       - 'cmake/modules/FindExiv2.cmake'
       - 'cmake/modules/FindFFMPEG.cmake'
+      - 'cmake/modules/FindASS.cmake'
       - 'cmake/modules/FindSpdlog.cmake'
       - 'cmake/modules/FindMariaDBClient.cmake'
       - 'cmake/modules/FindPCRE2.cmake'
