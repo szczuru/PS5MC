@@ -25,7 +25,9 @@ cd "$SRC"
 autoreconf -vif
 export CC CXX AR RANLIB
 export CFLAGS="$CFLAGS -fPIC"
-export CXXFLAGS="$CXXFLAGS -fPIC -isystem $OO_PS4_TOOLCHAIN/include/c++/v1 -include stdlib.h"
+# Kodi uses TiXmlDocument RTTI, so TinyXML must emit typeinfo even though most
+# PS4 third-party dependencies are built without it.
+export CXXFLAGS="$CXXFLAGS -fPIC -frtti -isystem $OO_PS4_TOOLCHAIN/include/c++/v1 -include stdlib.h"
 export LDFLAGS="$LDFLAGS -nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x -Wl,--eh-frame-hdr -lc++ -lc -lkernel -lSceSysmodule $OO_PS4_TOOLCHAIN/lib/crt1.o"
 
 if ! ./configure --prefix="$PS4_PREFIX" --host="$HOST" --disable-shared; then
