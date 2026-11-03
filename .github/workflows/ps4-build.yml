@@ -170,8 +170,8 @@ jobs:
         with:
           path: ~/OpenOrbis
           key: openorbis-v0.5.4-llvm18
-      - name: Cache kompilacji ccache
-        uses: actions/cache@v4
+      - name: Odtwórz cache kompilatora
+        uses: actions/cache/restore@v4
         with:
           path: ~/.cache/ccache
           key: ps4-ccache-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
@@ -195,12 +195,20 @@ jobs:
       - name: Uprawnienia skryptów
         run: chmod +x ps4/scripts/*.sh ps4/depends/scripts/*.sh
       - name: Buduj Kodi
+        env:
+          PS4_BUILD_JOBS: 4
         run: |
-          ccache --max-size=500M
+          ccache --max-size=1G
           bash ps4/scripts/build-kodi.sh "$GITHUB_WORKSPACE/dist/kodi"
       - name: Statystyki ccache
         if: always()
         run: ccache --show-stats || true
+      - name: Zapisz cache kompilatora
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/ccache
+          key: ps4-ccache-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         with:
           name: ps4mc-kodi-pkg

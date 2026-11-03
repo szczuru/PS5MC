@@ -1499,7 +1499,7 @@ extern "C"
 #if !defined(TARGET_POSIX) || defined(TARGET_DARWIN) || (defined(TARGET_FREEBSD) && !defined(TARGET_PS4)) || \
     defined(TARGET_ANDROID)
     *pos = (fpos_t)tmpPos;
-#elif defined(TARGET_WASM)
+#elif defined(TARGET_WASM) || defined(TARGET_PS4)
     *pos = tmpPos;
 #else
     pos->__pos = (off_t)tmpPos.__pos;

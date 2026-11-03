@@ -12,8 +12,12 @@
 #ifdef TARGET_POSIX
 #include <sys/ioctl.h>
 #if defined(TARGET_PS4)
-#include <sys/filio.h>
-#include <sys/sockio.h>
+#ifndef FIONBIO
+#define FIONBIO 0x8004667eUL
+#endif
+#ifndef FIONREAD
+#define FIONREAD 0x4004667fUL
+#endif
 #endif
 #endif
 #include "Network.h"
