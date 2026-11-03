@@ -12,7 +12,9 @@
 #include "utils/URIUtils.h"
 #include "utils/log.h"
 
+#include <algorithm>
 #include <cstdlib>
+#include <sys/stat.h>
 
 CPosixMountProvider::CPosixMountProvider()
 {
@@ -71,6 +73,21 @@ void CPosixMountProvider::GetDrives(std::vector<CMediaSource>& drives)
     }
     pclose(pipe);
   }
+
+#if defined(TARGET_PS4)
+  // The PS4 system mounts inserted optical media at one of these paths. Its
+  // mount table can be hidden from a homebrew process, so probe the known
+  // mount points directly as well as parsing `mount` output.
+  for (const char* mountPath : {"/mnt/disc", "/mnt/disc0"})
+  {
+    struct stat mountInfo{};
+    if (stat(mountPath, &mountInfo) == 0 && S_ISDIR(mountInfo.st_mode) &&
+        std::find(result.begin(), result.end(), mountPath) == result.end())
+    {
+      result.emplace_back(mountPath);
+    }
+  }
+#endif
 
   for (unsigned int i = 0; i < result.size(); i++)
   {

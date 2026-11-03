@@ -1,7 +1,6 @@
 # xbmc/platform/ps4/CMakeLists.txt
 
 set(SOURCES
-  main.cpp
   PlatformPS4.cpp
   CPUInfoPS4.cpp
   MemUtils.cpp
