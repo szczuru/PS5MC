@@ -88,7 +88,8 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
             "AR=${CMAKE_AR}"
             "RANLIB=${CMAKE_RANLIB}"
             "CFLAGS=${CMAKE_C_FLAGS}"
-            "CXXFLAGS=${CMAKE_CXX_FLAGS}")
+            "CXXFLAGS=${CMAKE_CXX_FLAGS}"
+            "LDFLAGS=${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_C_STANDARD_LIBRARIES}")
       endif()
     endif()
 
