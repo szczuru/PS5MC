@@ -172,6 +172,15 @@ jobs:
         with:
           path: ~/OpenOrbis
           key: openorbis-v0.5.4-llvm18
+      - name: Cache LLVM libc++ source and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ps4/build/llvm-project
+            ps4/build/libcxx
+          key: ps4-libcxx-18.1.3-openorbis-v0.5.4-${{ hashFiles('ps4/scripts/build-libcxx.sh', 'ps4/toolchain/libcxx-ps4.cmake') }}
+          restore-keys: |
+            ps4-libcxx-18.1.3-openorbis-v0.5.4-
       - name: Odtwórz cache kompilatora
         uses: actions/cache/restore@v4
         with:

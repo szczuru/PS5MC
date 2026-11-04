@@ -59,7 +59,7 @@ endif()
 
 # Executables: PIE, Sony linker script, our libc, Sony stub libraries.
 set(CMAKE_EXE_LINKER_FLAGS_INIT
-    "-nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,${OO_PS4_TOOLCHAIN}/link.x -Wl,--eh-frame-hdr -L${OO_PS4_TOOLCHAIN}/lib -L${PS4_PREFIX}/lib")
+    "-nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,${OO_PS4_TOOLCHAIN}/link.x -Wl,--eh-frame-hdr -L${PS4_PREFIX}/lib -L${OO_PS4_TOOLCHAIN}/lib")
 set(_ps4_system_libraries "-lSceVideoOut -lSceAudioOut -lScePad -lSceUserService -lSceSystemService -lSceSysmodule -lScePigletv2VSH -lkernel -lc -lm")
 set(CMAKE_C_STANDARD_LIBRARIES   "${_ps4_system_libraries} ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
 set(CMAKE_CXX_STANDARD_LIBRARIES "-lc++ ${_ps4_system_libraries} ${OO_PS4_TOOLCHAIN}/lib/crt1.o")

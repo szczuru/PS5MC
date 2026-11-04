@@ -62,6 +62,11 @@ PY
   done
 fi
 
+# The OpenOrbis SDK's libc++.a is built from an older libc++ than the LLVM 18
+# headers Kodi needs. Build the matching static runtime and install it in the
+# PS4 dependency prefix before rebuilding C++ dependencies and Kodi.
+"$root/ps4/scripts/build-libcxx.sh"
+
 export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
 export PKG_CONFIG_LIBDIR="$prefix/lib/pkgconfig"
 export PKG_CONFIG_SYSROOT_DIR=""
