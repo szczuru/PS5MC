@@ -7,7 +7,8 @@ if(NOT DEFINED OO_PS4_TOOLCHAIN)
   endif()
 endif()
 if(NOT DEFINED PS4_PREFIX)
-  message(FATAL_ERROR "PS4_PREFIX must point to the PS4 dependency prefix")
+  get_filename_component(PS4_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../depends/prefix" ABSOLUTE)
+  set(PS4_PREFIX "${PS4_PREFIX}" CACHE PATH "PS4 dependency prefix")
 endif()
 
 set(CMAKE_SYSTEM_NAME FreeBSD)
@@ -34,6 +35,7 @@ set(CMAKE_CXX_FLAGS_INIT
 set(CMAKE_EXE_LINKER_FLAGS_INIT
     "-nostdlib -fuse-ld=lld -L${PS4_PREFIX}/lib -L${OO_PS4_TOOLCHAIN}/lib")
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES OO_PS4_TOOLCHAIN PS4_PREFIX)
 
 find_program(CMAKE_AR NAMES llvm-ar-18 llvm-ar REQUIRED)
 find_program(CMAKE_RANLIB NAMES llvm-ranlib-18 llvm-ranlib REQUIRED)
