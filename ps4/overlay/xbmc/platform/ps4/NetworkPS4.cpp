@@ -29,6 +29,12 @@ public:
   }
 
   const std::string& InterfaceName() const { return m_interfaceName; }
+  bool GetHostMacAddress(unsigned long, std::string& mac) const override
+  {
+    mac.clear();
+    return false;
+  }
+  std::string GetCurrentDefaultGateway() const override { return {}; }
 
 private:
   static char* EmptyMac()
@@ -68,17 +74,18 @@ private:
     if (getifaddrs(&interfaces) != 0)
       return;
 
+    std::vector<std::string> addedNames;
     for (ifaddrs* current = interfaces; current; current = current->ifa_next)
     {
       if (!current->ifa_name || !current->ifa_addr || current->ifa_addr->sa_family != AF_INET)
         continue;
 
       const std::string name(current->ifa_name);
-      const bool alreadyAdded = std::any_of(m_interfaces.begin(), m_interfaces.end(),
-                                            [&name](const CNetworkInterface* item)
-                                            { return static_cast<CNetworkInterfacePS4*>(item)->InterfaceName() == name; });
-      if (!alreadyAdded)
+      if (std::find(addedNames.begin(), addedNames.end(), name) == addedNames.end())
+      {
         m_interfaces.push_back(new CNetworkInterfacePS4(this, name));
+        addedNames.push_back(name);
+      }
     }
 
     freeifaddrs(interfaces);
