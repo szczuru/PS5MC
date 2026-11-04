@@ -18,6 +18,7 @@ if [ -f "$host_libcxx/ranges" ]; then
     cp -a "$host_libcxx/." "$target_libcxx/"
     python3 - "$target_libcxx/math.h" <<'PY'
 from pathlib import Path
+import re
 import sys
 
 path = Path(sys.argv[1])
@@ -31,6 +32,24 @@ for name in ("isinf", "isnan"):
         raise SystemExit(f"Expected libc++ math declaration not found: {declaration}")
     source = source.replace(declaration, marker, 1)
 path.write_text(source)
+
+# OpenOrbis v0.5.4 ships a libc++abi older than LLVM 18's exception_ptr ABI.
+# Keep LLVM 18's C++20 headers, but make exception_ptr use its pre-18 fallback
+# (__cxa_allocate_exception + throw/catch), which the SDK runtime supports.
+availability_files = list(path.parent.rglob("availability.h"))
+patched = 0
+for availability in availability_files:
+    source = availability.read_text()
+    updated, count = re.subn(
+        r"(?m)^(\s*#\s*define\s+_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION)\s+.*$",
+        r"\1 0",
+        source,
+    )
+    if count:
+        availability.write_text(updated)
+        patched += count
+if patched == 0:
+    raise SystemExit("Could not disable LLVM 18 exception_ptr ABI unavailable in OpenOrbis")
 PY
     install -m 0644 "$root/ps4/toolchain/compat/xlocale.h" "$target_prefix/include/xlocale.h"
     install -m 0644 "$root/ps4/toolchain/compat/pthread_np.h" "$target_prefix/include/pthread_np.h"
