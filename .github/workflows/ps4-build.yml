@@ -199,7 +199,9 @@ jobs:
         env:
           PS4_BUILD_JOBS: 4
         run: |
-          ccache --max-size=1G
+          # Kodi's translation units exceed 1 GiB; keep the full working set
+          # between Actions runs so fixes rebuild only affected files.
+          ccache --max-size=5G
           bash ps4/scripts/build-kodi.sh "$GITHUB_WORKSPACE/dist/kodi"
       - name: Statystyki ccache
         if: always()
