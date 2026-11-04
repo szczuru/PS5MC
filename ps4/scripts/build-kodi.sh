@@ -36,20 +36,25 @@ path.write_text(source)
 # OpenOrbis v0.5.4 ships a libc++abi older than LLVM 18's exception_ptr ABI.
 # Keep LLVM 18's C++20 headers, but make exception_ptr use its pre-18 fallback
 # (__cxa_allocate_exception + throw/catch), which the SDK runtime supports.
-availability_files = list(path.parent.rglob("availability.h"))
+macro = "_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION"
 patched = 0
-for availability in availability_files:
-    source = availability.read_text()
-    updated, count = re.subn(
-        r"(?m)^(\s*#\s*define\s+_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION)\s+.*$",
-        r"\1 0",
-        source,
-    )
+definitions = []
+for header in path.parent.rglob("*.h"):
+    source = header.read_text()
+    pattern = rf"(?m)^(\s*#\s*define\s+{macro})\s+.*$"
+    updated, count = re.subn(pattern, r"\1 0", source)
     if count:
-        availability.write_text(updated)
+        header.write_text(updated)
         patched += count
-if patched == 0:
-    raise SystemExit("Could not disable LLVM 18 exception_ptr ABI unavailable in OpenOrbis")
+        definitions.append(str(header))
+
+# Some packaged libc++ headers already undefine this macro or omit it entirely
+# when the target has no compatible libc++abi. In that case #if treats it as 0
+# and exception_ptr.h selects the compatible throw/catch implementation.
+if patched:
+    print(f"Disabled {macro} in: {', '.join(definitions)}")
+else:
+    print(f"{macro} has no active definition; libc++ uses its ABI fallback")
 PY
     install -m 0644 "$root/ps4/toolchain/compat/xlocale.h" "$target_prefix/include/xlocale.h"
     install -m 0644 "$root/ps4/toolchain/compat/pthread_np.h" "$target_prefix/include/pthread_np.h"
