@@ -6,6 +6,7 @@ on:
     branches: [ps4-kodi-piers]
     paths:
       - 'ps4/**'
+      - 'xbmc/cores/VideoPlayer/VideoRenderers/**'
       - 'cmake/platform/ps4/**'
       - 'xbmc/platform/posix/PosixMountProvider.cpp'
       - 'xbmc/platform/posix/Filesystem.cpp'
