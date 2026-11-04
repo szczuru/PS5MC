@@ -2,7 +2,6 @@ xbmc/cores/RetroPlayer/shaders/gles cores/RetroPlayer/shaders/gles
 xbmc/input/touch input/touch
 xbmc/input/touch/generic input/touch/generic
 xbmc/platform/common/speech platform/common/speech
-xbmc/platform/freebsd/network platform/freebsd/network
 xbmc/platform/linux/storage platform/linux/storage
 xbmc/platform/posix platform/posix
 xbmc/platform/posix/filesystem platform/posix/filesystem

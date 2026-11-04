@@ -4,6 +4,7 @@ set(SOURCES
   PlatformPS4.cpp
   CPUInfoPS4.cpp
   ${CMAKE_SOURCE_DIR}/xbmc/platform/freebsd/GPUInfoFreebsd.cpp
+  NetworkPS4.cpp
   MemUtils.cpp
   VideoOutInfo.cpp
   ${CMAKE_SOURCE_DIR}/ps4/src/PS4Privileges.cpp
