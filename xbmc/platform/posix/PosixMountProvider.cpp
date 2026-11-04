@@ -78,7 +78,7 @@ void CPosixMountProvider::GetDrives(std::vector<CMediaSource>& drives)
   // The PS4 system mounts inserted optical media at one of these paths. Its
   // mount table can be hidden from a homebrew process, so probe the known
   // mount points directly as well as parsing `mount` output.
-  for (const char* mountPath : {"/mnt/disc", "/mnt/disc0"})
+  for (const char* mountPath : {"/mnt/disc", "/mnt/disc0", "/mnt/sandbox/disc0"})
   {
     struct stat mountInfo{};
     if (stat(mountPath, &mountInfo) == 0 && S_ISDIR(mountInfo.st_mode) &&

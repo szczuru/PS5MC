@@ -14,6 +14,12 @@ bool CPlatformPS4::InitStageOne()
   // Escalate privileges (libXcape / jbc) – needed for disc, full FS, etc.
   auto r = PS4Privileges::Escalate();
   CLog::Log(LOGINFO, "PS4: Escalate privileges -> {}", PS4Privileges::ResultStr(r));
+  if (r == PS4Privileges::Result::OK || r == PS4Privileges::Result::AlreadyDone)
+  {
+    const auto mountResult = PS4Privileges::MountDisc();
+    CLog::Log(LOGINFO, "PS4: Mount optical drive -> {}",
+              PS4Privileges::ResultStr(mountResult));
+  }
 
   sceUserServiceInitialize(nullptr);
 
@@ -31,6 +37,7 @@ bool CPlatformPS4::InitStageTwo()
 void CPlatformPS4::DeinitStageOne()
 {
   CLog::Log(LOGINFO, "PS4: DeinitStageOne");
+  PS4Privileges::UnmountDisc();
   PS4Privileges::Drop();
   CPlatformPosix::DeinitStageOne();
 }
