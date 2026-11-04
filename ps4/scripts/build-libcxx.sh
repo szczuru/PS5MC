@@ -93,6 +93,33 @@ source, freebsd_locale_count = re.subn(
 )
 if freebsd_locale_count == 0 and new_freebsd not in source:
     raise SystemExit("Could not disable FreeBSD rune locale assumptions for PS4")
+
+# OpenOrbis does not provide arc4random. libc++'s /dev/urandom backend uses
+# open/read/close, which the SDK supports and Kodi's std::random_device needs.
+lines = source.splitlines()
+random_condition = "#  if defined(__APPLE__) || (defined(__FreeBSD__) && !defined(__PS4__)) || defined(__NetBSD__) || defined(__OpenBSD__) || \\" 
+condition_patched = False
+for index, line in enumerate(lines[:-1]):
+    if line.startswith(
+        "#  if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) ||"
+    ) and lines[index + 1].strip() == "defined(__DragonFly__)":
+        lines[index] = random_condition
+        condition_patched = True
+        break
+    if line == random_condition and lines[index + 1].strip() == "defined(__DragonFly__)":
+        condition_patched = True
+        break
+if not condition_patched:
+    raise SystemExit("Could not select libc++ random_device backend for PS4")
+
+ps4_random = ["#  elif defined(__PS4__)", "#    define _LIBCPP_USING_DEV_RANDOM"]
+if ps4_random[0] not in lines:
+    try:
+        wasi_index = lines.index("#  elif defined(__wasi__) || defined(__EMSCRIPTEN__)")
+    except ValueError as exc:
+        raise SystemExit("Could not locate libc++ random backend selection") from exc
+    lines[wasi_index:wasi_index] = ps4_random
+source = "\n".join(lines) + "\n"
 config_header.write_text(source)
 
 filesystem_source = include.parent / "src" / "filesystem" / "operations.cpp"
