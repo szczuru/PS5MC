@@ -62,7 +62,6 @@ cmake -S "$llvm_source/runtimes" -B "$build" -G Ninja \
   -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=OFF \
   -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=OFF \
   -DLIBCXX_CXX_ABI=libcxxabi \
-  -DLIBCXX_CXX_ABI_INCLUDE_PATHS="$llvm_source/libcxxabi/include" \
   -DLIBCXX_ABI_VERSION=1 \
   -DLIBCXX_ENABLE_EXCEPTIONS=ON \
   -DLIBCXX_ENABLE_RTTI=ON \
