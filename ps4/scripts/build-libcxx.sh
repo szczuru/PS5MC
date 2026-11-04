@@ -97,7 +97,7 @@ if freebsd_locale_count == 0 and new_freebsd not in source:
 # OpenOrbis does not provide arc4random. libc++'s /dev/urandom backend uses
 # open/read/close, which the SDK supports and Kodi's std::random_device needs.
 lines = source.splitlines()
-random_condition = "#  if defined(__APPLE__) || (defined(__FreeBSD__) && !defined(__PS4__)) || defined(__NetBSD__) || defined(__OpenBSD__) || \\" 
+random_condition = "#  if defined(__APPLE__) || (defined(__FreeBSD__) && !defined(__PS4__)) || defined(__NetBSD__) || defined(__OpenBSD__) || " + chr(92)
 condition_patched = False
 for index, line in enumerate(lines[:-1]):
     if line.startswith(
@@ -154,6 +154,14 @@ cmake -S "$llvm_source/runtimes" -B "$build" -G Ninja \
   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
 cmake --build "$build" --target install-cxx --parallel "${PS4_BUILD_JOBS:-2}" -- -k 0
+
+# ExternalProject dependencies use the OpenOrbis prefix rather than PS4_PREFIX.
+# Keep both prefixes on the same headers and runtime to avoid mixed libc++ ABIs.
+sdk_prefix="$OO_PS4_TOOLCHAIN/ps4mc-prefix"
+rm -rf "$sdk_prefix/include/c++/v1"
+mkdir -p "$sdk_prefix/include/c++/v1"
+cp -a "$prefix/include/c++/v1/." "$sdk_prefix/include/c++/v1/"
+install -m 0644 "$prefix/lib/libc++.a" "$sdk_prefix/lib/libc++.a"
 
 # Install the two SDK compatibility headers alongside the new libc++ headers.
 for target_prefix in "$prefix" "$OO_PS4_TOOLCHAIN/ps4mc-prefix"; do
