@@ -159,7 +159,7 @@ cmake --build "$build" --target install-cxx --parallel "${PS4_BUILD_JOBS:-2}" --
 # Keep both prefixes on the same headers and runtime to avoid mixed libc++ ABIs.
 sdk_prefix="$OO_PS4_TOOLCHAIN/ps4mc-prefix"
 rm -rf "$sdk_prefix/include/c++/v1"
-mkdir -p "$sdk_prefix/include/c++/v1"
+mkdir -p "$sdk_prefix/include/c++/v1" "$sdk_prefix/lib"
 cp -a "$prefix/include/c++/v1/." "$sdk_prefix/include/c++/v1/"
 install -m 0644 "$prefix/lib/libc++.a" "$sdk_prefix/lib/libc++.a"
 
