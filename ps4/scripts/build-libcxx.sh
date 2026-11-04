@@ -49,6 +49,27 @@ for header in (include / "__availability", include / "availability.h"):
         break
 else:
     raise SystemExit(f"No active definition found for {macro} in LLVM libc++ headers")
+
+# OpenOrbis reports a FreeBSD target triple but does not implement FreeBSD's
+# private umtx syscall API. Keep libc++'s portable timed-backoff implementation
+# for atomic wait/notify on PS4 rather than including sys/umtx.h.
+atomic_source = include.parent / "src" / "atomic.cpp"
+source = atomic_source.read_text()
+source, include_count = re.subn(
+    r"(?m)^#elif defined\(__FreeBSD__\)$",
+    "#elif defined(__FreeBSD__) && !defined(__PS4__)",
+    source,
+    count=1,
+)
+source, implementation_count = re.subn(
+    r"(?m)^#elif defined\(__FreeBSD__\) && __SIZEOF_LONG__ == 8$",
+    "#elif defined(__FreeBSD__) && !defined(__PS4__) && __SIZEOF_LONG__ == 8",
+    source,
+    count=1,
+)
+if include_count != 1 or implementation_count != 1:
+    raise SystemExit("Could not isolate libc++ FreeBSD umtx code for PS4")
+atomic_source.write_text(source)
 PY
 
 cmake -S "$llvm_source/runtimes" -B "$build" -G Ninja \
@@ -70,7 +91,7 @@ cmake -S "$llvm_source/runtimes" -B "$build" -G Ninja \
   -DCMAKE_C_COMPILER_LAUNCHER=ccache \
   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
-cmake --build "$build" --target install-cxx --parallel "${PS4_BUILD_JOBS:-2}"
+cmake --build "$build" --target install-cxx --parallel "${PS4_BUILD_JOBS:-2}" -- -k 0
 
 # Install the two SDK compatibility headers alongside the new libc++ headers.
 for target_prefix in "$prefix" "$OO_PS4_TOOLCHAIN/ps4mc-prefix"; do
