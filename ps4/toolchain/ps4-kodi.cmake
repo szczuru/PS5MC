@@ -34,11 +34,16 @@ find_program(CMAKE_AR     NAMES llvm-ar-18 llvm-ar       REQUIRED)
 find_program(CMAKE_RANLIB NAMES llvm-ranlib-18 llvm-ranlib REQUIRED)
 find_program(CMAKE_STRIP  NAMES llvm-strip-18 llvm-strip)
 find_program(CMAKE_NM     NAMES llvm-nm-18 llvm-nm)
+execute_process(
+  COMMAND "${PS4_CLANG}" -print-resource-dir
+  OUTPUT_VARIABLE PS4_CLANG_RESOURCE_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY)
 
 # A sysroot-like prefix for libraries we cross-build ourselves (FFmpeg, ...).
 set(PS4_PREFIX "${OO_PS4_TOOLCHAIN}/ps4mc-prefix" CACHE PATH "install prefix of cross-built libs")
 
-set(_ps4_common "-fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_PREFIX}/include")
+set(_ps4_common "-nostdinc -fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_CLANG_RESOURCE_DIR}/include -isystem ${PS4_PREFIX}/include")
 set(CMAKE_C_FLAGS_INIT   "${_ps4_common}")
 # Kodi uses C++20 ranges. build-kodi.sh stages LLVM 18's libc++ headers under
 # PS4_PREFIX and applies the two compatibility shims needed by OpenOrbis libc.

@@ -39,7 +39,9 @@ path.write_text(source)
 macro = "_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION"
 patched = 0
 definitions = []
-for header in path.parent.rglob("*.h"):
+availability_files = list(path.parent.rglob("availability.h"))
+availability_files.extend(path.parent.rglob("__availability"))
+for header in set(availability_files):
     source = header.read_text()
     pattern = rf"(?m)^(\s*#\s*define\s+{macro})\s+.*$"
     updated, count = re.subn(pattern, r"\1 0", source)
@@ -48,9 +50,8 @@ for header in path.parent.rglob("*.h"):
         patched += count
         definitions.append(str(header))
 
-# Some packaged libc++ headers already undefine this macro or omit it entirely
-# when the target has no compatible libc++abi. In that case #if treats it as 0
-# and exception_ptr.h selects the compatible throw/catch implementation.
+# LLVM 18 may keep availability settings in the extensionless __availability
+# file. If the macro is absent, #if treats it as 0 and selects the ABI fallback.
 if patched:
     print(f"Disabled {macro} in: {', '.join(definitions)}")
 else:
