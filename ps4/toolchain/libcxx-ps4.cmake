@@ -31,7 +31,7 @@ set(_ps4_sysroot_flags
     "-nostdinc -fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_CLANG_RESOURCE_DIR}/include -isystem ${PS4_PREFIX}/include")
 set(CMAKE_C_FLAGS_INIT "${_ps4_sysroot_flags}")
 set(CMAKE_CXX_FLAGS_INIT
-    "${_ps4_sysroot_flags} -isystem ${CMAKE_CURRENT_LIST_DIR}/../build/llvm-project/libcxxabi/include -D_LIBCPP_HAS_MUSL_LIBC -D_LIBCPP_DISABLE_AVAILABILITY -fexceptions -fcxx-exceptions")
+    "${_ps4_sysroot_flags} -isystem ${CMAKE_CURRENT_LIST_DIR}/../build/llvm-project/libcxxabi/include -D_LIBCPP_DISABLE_AVAILABILITY -fexceptions -fcxx-exceptions")
 set(CMAKE_EXE_LINKER_FLAGS_INIT
     "-nostdlib -fuse-ld=lld -L${PS4_PREFIX}/lib -L${OO_PS4_TOOLCHAIN}/lib")
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)

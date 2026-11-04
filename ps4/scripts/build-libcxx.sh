@@ -67,9 +67,43 @@ source, implementation_count = re.subn(
     source,
     count=1,
 )
+if include_count == 0 and "#elif defined(__FreeBSD__) && !defined(__PS4__)" in source:
+    include_count = 1
+if implementation_count == 0 and "#elif defined(__FreeBSD__) && !defined(__PS4__) && __SIZEOF_LONG__ == 8" in source:
+    implementation_count = 1
 if include_count != 1 or implementation_count != 1:
     raise SystemExit("Could not isolate libc++ FreeBSD umtx code for PS4")
 atomic_source.write_text(source)
+
+# OpenOrbis presents FreeBSD headers but its libc is musl. Do not select
+# FreeBSD-only locale entry points for this target; libc++'s musl locale
+# compatibility layer provides the C-locale fallbacks instead.
+config_header = include / "__config"
+source = config_header.read_text()
+old_locale = "#  if defined(__APPLE__) || defined(__FreeBSD__) || defined(_LIBCPP_MSVCRT_LIKE) || defined(__NetBSD__)"
+new_locale = "#  if defined(__APPLE__) || (defined(__FreeBSD__) && !defined(__PS4__)) || defined(_LIBCPP_MSVCRT_LIKE) || defined(__NetBSD__)"
+if old_locale in source:
+    source = source.replace(old_locale, new_locale, 1)
+elif new_locale not in source:
+    raise SystemExit("Could not configure libc++ locale extensions for PS4")
+old_freebsd = "#  if defined(__APPLE__) || defined(__FreeBSD__)"
+new_freebsd = "#  if defined(__APPLE__) || (defined(__FreeBSD__) && !defined(__PS4__))"
+source, freebsd_locale_count = re.subn(
+    rf"(?m)^{re.escape(old_freebsd)}\s*$", new_freebsd, source
+)
+if freebsd_locale_count == 0 and new_freebsd not in source:
+    raise SystemExit("Could not disable FreeBSD rune locale assumptions for PS4")
+config_header.write_text(source)
+
+filesystem_source = include.parent / "src" / "filesystem" / "operations.cpp"
+source = filesystem_source.read_text()
+old_sendfile = "#if __has_include(<sys/sendfile.h>)"
+new_sendfile = "#if __has_include(<sys/sendfile.h>) && !defined(__PS4__)"
+if old_sendfile in source:
+    source = source.replace(old_sendfile, new_sendfile, 1)
+elif new_sendfile not in source:
+    raise SystemExit("Could not select libc++'s portable file-copy path for PS4")
+filesystem_source.write_text(source)
 PY
 
 cmake -S "$llvm_source/runtimes" -B "$build" -G Ninja \
@@ -84,6 +118,7 @@ cmake -S "$llvm_source/runtimes" -B "$build" -G Ninja \
   -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=OFF \
   -DLIBCXX_CXX_ABI=libcxxabi \
   -DLIBCXX_ABI_VERSION=1 \
+  -DLIBCXX_HAS_MUSL_LIBC=ON \
   -DLIBCXX_ENABLE_EXCEPTIONS=ON \
   -DLIBCXX_ENABLE_RTTI=ON \
   -DLIBCXX_INCLUDE_TESTS=OFF \

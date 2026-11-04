@@ -51,10 +51,10 @@ set(PS4_LIBCXX_INCLUDE_DIR "${PS4_PREFIX}/include/c++/v1")
 if(NOT EXISTS "${PS4_LIBCXX_INCLUDE_DIR}/ranges")
   set(PS4_LIBCXX_INCLUDE_DIR "${OO_PS4_TOOLCHAIN}/include/c++/v1")
 endif()
-set(CMAKE_CXX_FLAGS_INIT "-isystem ${PS4_LIBCXX_INCLUDE_DIR} ${_ps4_common} -D_LIBCPP_HAS_MUSL_LIBC -D_LIBCPP_HAS_NO_VENDOR_AVAILABILITY_ANNOTATIONS -D_LIBCPP_DISABLE_AVAILABILITY -D_LIBCPP_DISABLE_EXTERN_TEMPLATE -fexceptions -fcxx-exceptions")
+set(CMAKE_CXX_FLAGS_INIT "-isystem ${PS4_LIBCXX_INCLUDE_DIR} ${_ps4_common} -D_LIBCPP_HAS_NO_VENDOR_AVAILABILITY_ANNOTATIONS -D_LIBCPP_DISABLE_AVAILABILITY -D_LIBCPP_DISABLE_EXTERN_TEMPLATE -fexceptions -fcxx-exceptions")
 # Prefer toolchain libc includes before host ones when using host libc++ headers.
 if(EXISTS "/usr/lib/llvm-18/include/c++/v1/ranges")
-  set(CMAKE_CXX_FLAGS_INIT "-isystem ${PS4_LIBCXX_INCLUDE_DIR} -isystem ${OO_PS4_TOOLCHAIN}/include ${_ps4_common} -D_LIBCPP_HAS_MUSL_LIBC -D_LIBCPP_HAS_NO_VENDOR_AVAILABILITY_ANNOTATIONS -D_LIBCPP_DISABLE_AVAILABILITY -D_LIBCPP_DISABLE_EXTERN_TEMPLATE -fexceptions -fcxx-exceptions")
+  set(CMAKE_CXX_FLAGS_INIT "-isystem ${PS4_LIBCXX_INCLUDE_DIR} -isystem ${OO_PS4_TOOLCHAIN}/include ${_ps4_common} -D_LIBCPP_HAS_NO_VENDOR_AVAILABILITY_ANNOTATIONS -D_LIBCPP_DISABLE_AVAILABILITY -D_LIBCPP_DISABLE_EXTERN_TEMPLATE -fexceptions -fcxx-exceptions")
 endif()
 
 # Executables: PIE, Sony linker script, our libc, Sony stub libraries.
