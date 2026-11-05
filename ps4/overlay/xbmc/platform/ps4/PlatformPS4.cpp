@@ -1,6 +1,8 @@
 // xbmc/platform/ps4/PlatformPS4.cpp
 #include "PlatformPS4.h"
 #include "PS4Privileges.h"
+#include "platform/ps4/video/VideoCodecRegistration.h"
+#include "platform/ps4/video/VideoDec2PS4.h"
 #include "windowing/ps4/WinSystemPS4.h"
 #include "utils/log.h"
 
@@ -22,6 +24,12 @@ bool CPlatformPS4::InitStageOne()
   }
 
   sceUserServiceInitialize(nullptr);
+
+  KODI::PLATFORM::PS4::RegisterVideoCodecs();
+  const int32_t videodec = KODI::PLATFORM::PS4::CVideoDec2::LoadModule();
+  if (videodec < 0)
+    CLog::Log(LOGWARNING, "PS4: Videodec2 module not loaded: {:#x}",
+              static_cast<uint32_t>(videodec));
 
   KODI::WINDOWING::PS4::CWinSystemPS4::Register();
 
