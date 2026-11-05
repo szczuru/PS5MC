@@ -38,9 +38,7 @@ P="$bin/PkgTool.Core"
 "$P" sfo_setentry "$sfo" VERSION             --type Utf8    --maxsize 8   --value "$ver"
 
 ( cd "$stage"
-  # Kodi's installed resource tree exceeds Linux's per-argument size limit.
-  # create-gp4 supports walking a source directory, so pass the directory
-  # instead of flattening thousands of paths into one --files argument.
-  "$bin/create-gp4" -out "$stage/pkg.gp4" --content-id="$cid" --path "$stage"
+  # Kodi's installed resource tree exceeds create-gp4's --files argument limit.
+  python3 "$here/create-gp4.py" --stage "$stage" --out "$stage/pkg.gp4" --content-id "$cid"
   "$P" pkg_build "$stage/pkg.gp4" "$out" )
 ls -la "$out"/*.pkg
