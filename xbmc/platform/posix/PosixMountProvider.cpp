@@ -27,6 +27,15 @@ void CPosixMountProvider::Initialize()
   CLog::Log(LOGDEBUG, "Selected Posix mount as storage provider");
 }
 
+std::string CPosixMountProvider::GetFirstOpticalDeviceFileName()
+{
+#if defined(TARGET_PS4)
+  return "/dev/cd0";
+#else
+  return {};
+#endif
+}
+
 void CPosixMountProvider::GetDrives(std::vector<CMediaSource>& drives)
 {
   std::vector<std::string> result;

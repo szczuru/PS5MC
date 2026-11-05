@@ -21,6 +21,7 @@ public:
 
   void Initialize() override;
   void Stop() override { }
+  std::string GetFirstOpticalDeviceFileName() override;
 
   void GetLocalDrives(std::vector<CMediaSource>& localDrives) override { GetDrives(localDrives); }
   void GetRemovableDrives(std::vector<CMediaSource>& removableDrives) override

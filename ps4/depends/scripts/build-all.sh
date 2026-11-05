@@ -16,6 +16,7 @@ echo "=========================================="
 "$SCRIPTS/build-openssl.sh"
 "$SCRIPTS/build-curl.sh"
 "$SCRIPTS/build-ffmpeg.sh"
+"$SCRIPTS/build-libcdio.sh"
 
 echo ""
 echo "=========================================="
