@@ -62,7 +62,6 @@ jobs:
             dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
           done
           if ((${#missing[@]})); then
-            sudo apt-get update -qq
             sudo apt-get install -y -qq "${missing[@]}"
           fi
           sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
@@ -121,7 +120,6 @@ jobs:
             dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
           done
           if ((${#missing[@]})); then
-            sudo apt-get update -qq
             sudo apt-get install -y -qq "${missing[@]}"
           fi
           sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
@@ -181,7 +179,6 @@ jobs:
             dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
           done
           if ((${#missing[@]})); then
-            sudo apt-get update -qq
             sudo apt-get install -y -qq "${missing[@]}"
           fi
       - name: libssl1.1
