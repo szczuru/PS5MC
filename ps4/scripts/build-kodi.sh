@@ -125,6 +125,7 @@ EOF
 cp -a "$root/ps4/overlay/xbmc/platform/ps4" "$root/xbmc/platform/"
 cp -a "$root/ps4/overlay/xbmc/windowing/ps4" "$root/xbmc/windowing/"
 
+# OpenOrbis omits FreeBSD's DVD CSS ioctl header; CSS needs a PS4 ioctl port.
 cmake -S "$root" -B "$build" -G Ninja \
   -DCMAKE_TOOLCHAIN_FILE="$root/ps4/toolchain/ps4-kodi.cmake" \
   -DCMAKE_BUILD_TYPE=Release \
@@ -136,7 +137,7 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DNATIVEPREFIX="$native_prefix" \
   -DENABLE_TESTING=OFF \
   -DENABLE_OPTICAL=ON \
-  -DENABLE_DVDCSS=ON \
+  -DENABLE_DVDCSS=OFF \
   -DENABLE_INTERNAL_LIBDVD=ON \
   -DENABLE_PYTHON=OFF \
   -DENABLE_CEC=OFF \
