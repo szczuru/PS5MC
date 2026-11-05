@@ -37,6 +37,8 @@ CC="$CC -target x86_64-pc-freebsd12-elf --sysroot=$OO_PS4_TOOLCHAIN -nostdinc ${
       exit 1
     }
 
-make -j"$(nproc)"
-make install
+make -C lib -j"$(nproc)"
+make -C lib install
+make -C include install
+make install-data-am
 echo "libcdio OK -> $PS4_PREFIX/lib/libcdio.a"
