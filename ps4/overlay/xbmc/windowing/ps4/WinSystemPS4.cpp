@@ -101,9 +101,13 @@ bool CWinSystemPS4::InitWindowSystem()
   config.dbgPosCmd_0x40 = 1920;
   config.dbgPosCmd_0x44 = 1080;
   config.unk_0x5C = 2;
-  if (!scePigletSetConfigurationVSH(&config))
+  // The standalone PS4 probe treats negative SCE results as errors. A zero
+  // return is success, so a boolean check would reject successful setup.
+  const int32_t pigletResult = scePigletSetConfigurationVSH(&config);
+  if (pigletResult < 0)
   {
-    CLog::Log(LOGERROR, "PS4: scePigletSetConfigurationVSH failed");
+    CLog::Log(LOGERROR, "PS4: scePigletSetConfigurationVSH failed: {:#x}",
+              static_cast<uint32_t>(pigletResult));
     return false;
   }
 
