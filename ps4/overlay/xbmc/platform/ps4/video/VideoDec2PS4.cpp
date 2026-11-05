@@ -436,7 +436,11 @@ bool CVideoDec2::Open(VideoDec2Codec codec, int width, int height, std::string& 
          direct memory instead, as the heap does. The flexible path above is
          still tried first, so consoles where it works are unaffected. */
       size_t flexFree = 0;
-      sceKernelAvailableFlexibleMemorySize(&flexFree);
+      // OpenOrbis 0.5.4 declares this pointer-based API with a size_t value.
+      // The runtime function writes the available byte count through a pointer.
+      using AvailableFlexibleMemorySizeFn = int32_t (*)(size_t*);
+      reinterpret_cast<AvailableFlexibleMemorySizeFn>(sceKernelAvailableFlexibleMemorySize)(
+          &flexFree);
       std::string directError;
       if (!AllocateDirect(m_cpuWorkspaceSize, kMemoryTypeOnion, kProtCpu,
                           m_cpuWorkspaceDirect, directError))

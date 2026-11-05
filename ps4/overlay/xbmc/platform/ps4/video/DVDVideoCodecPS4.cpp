@@ -1146,7 +1146,6 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecPS4::GetPicture(VideoPicture* pVideoPictu
 
   Decoded d = m_decoded.front();
   m_decoded.pop_front();
-  KODI::PLATFORM::PS4::PS4_video_frame_stats().decoded.fetch_add(1, std::memory_order_relaxed);
   if (m_picturesOut++ == 0)
   {
     m_replay.clear(); // the hardware takes this stream: nothing to replay
