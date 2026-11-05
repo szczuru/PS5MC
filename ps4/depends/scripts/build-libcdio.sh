@@ -25,12 +25,17 @@ cd "$SRC"
 autoreconf -vif
 CC="$CC -target x86_64-pc-freebsd12-elf --sysroot=$OO_PS4_TOOLCHAIN -nostdinc ${INC_FLAGS_STR:-}" \
   CFLAGS="$CFLAGS -I$PS4_PREFIX/include" \
-  LDFLAGS="$LDFLAGS" \
-  ./configure --host="$HOST" --prefix="$PS4_PREFIX" \
+  LDFLAGS="$LDFLAGS -nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x -Wl,--eh-frame-hdr -L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib" \
+  LIBS="-lkernel -lc -lm $OO_PS4_TOOLCHAIN/lib/crt1.o" \
+  ./configure --build="$(gcc -dumpmachine)" --host="$HOST" --prefix="$PS4_PREFIX" \
     --disable-shared --enable-static \
     --with-cd-drive=no --with-cd-info=no --with-cdda-player=no --with-cd-read=no \
     --with-iso-info=no --with-iso-read=no --disable-example-progs \
-    --disable-cpp-progs --disable-cxx
+    --disable-cpp-progs --disable-cxx || {
+      echo "libcdio configure failed; config.log follows:" >&2
+      tail -n 160 config.log >&2
+      exit 1
+    }
 
 make -j"$(nproc)"
 make install
