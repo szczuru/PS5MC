@@ -138,10 +138,10 @@ cmake -S "$llvm_source/runtimes" -B "$build" -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$prefix" \
   -DPS4_PREFIX="$prefix" \
-  -DLLVM_ENABLE_RUNTIMES=libcxx \
+  -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
   -DLIBCXX_ENABLE_SHARED=OFF \
   -DLIBCXX_ENABLE_STATIC=ON \
-  -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=OFF \
+  -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
   -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=OFF \
   -DLIBCXX_CXX_ABI=libcxxabi \
   -DLIBCXX_ABI_VERSION=1 \
@@ -153,7 +153,7 @@ cmake -S "$llvm_source/runtimes" -B "$build" -G Ninja \
   -DCMAKE_C_COMPILER_LAUNCHER=ccache \
   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
-cmake --build "$build" --target install-cxx --parallel "${PS4_BUILD_JOBS:-2}" -- -k 0
+cmake --build "$build" --target install --parallel "${PS4_BUILD_JOBS:-2}" -- -k 0
 
 # ExternalProject dependencies use the OpenOrbis prefix rather than PS4_PREFIX.
 # Keep both prefixes on the same headers and runtime to avoid mixed libc++ ABIs.
@@ -162,6 +162,13 @@ rm -rf "$sdk_prefix/include/c++/v1"
 mkdir -p "$sdk_prefix/include/c++/v1" "$sdk_prefix/lib"
 cp -a "$prefix/include/c++/v1/." "$sdk_prefix/include/c++/v1/"
 install -m 0644 "$prefix/lib/libc++.a" "$sdk_prefix/lib/libc++.a"
+for runtime in libc++abi libunwind; do
+  if [ ! -f "$prefix/lib/$runtime.a" ]; then
+    echo "Expected LLVM runtime archive is missing: $prefix/lib/$runtime.a" >&2
+    exit 1
+  fi
+  install -m 0644 "$prefix/lib/$runtime.a" "$sdk_prefix/lib/$runtime.a"
+done
 
 # Install the two SDK compatibility headers alongside the new libc++ headers.
 for target_prefix in "$prefix" "$OO_PS4_TOOLCHAIN/ps4mc-prefix"; do
