@@ -30,6 +30,15 @@ if(NOT TARGET LIBRARY::${CMAKE_FIND_PACKAGE_NAME})
       set(${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_C_FLAGS "-DPATH_MAX=2048 -D_BSD_SOURCE")
     endif()
 
+    if(CORE_SYSTEM_NAME STREQUAL ps4)
+      # OpenOrbis ships the FreeBSD 12 ABI but omits its DVD ioctl header.
+      # Provide the matching ABI declarations so libdvdcss can use the native
+      # FreeBSD DVD authentication and structure ioctls on PS4.
+      set(_libdvdcss_c_flags "${${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_C_FLAGS}")
+      string(APPEND _libdvdcss_c_flags " -I${CORE_SOURCE_DIR}/ps4/toolchain/compat")
+      set(${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_C_FLAGS "${_libdvdcss_c_flags}")
+    endif()
+
     if(WIN32 OR WINDOWS_STORE)
       if(WINDOWS_STORE)
         list(APPEND patches "${CORE_SOURCE_DIR}/tools/depends/target/${${CMAKE_FIND_PACKAGE_NAME}_MODULE_LC}/03-win-uwpfixes.patch")
