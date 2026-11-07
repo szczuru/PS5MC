@@ -5,10 +5,18 @@ source "$(dirname "$0")/env-depends.sh"
 VER=3.0.15
 SRC="$PS4_BUILD/openssl-$VER"
 TARBALL="openssl-$VER.tar.gz"
+STAMP="$PS4_PREFIX/.openssl-$VER-ps4-sock-stdio"
 
-if [ -f "$PS4_PREFIX/lib/libssl.a" ] && [ -f "$PS4_PREFIX/lib/libcrypto.a" ]; then
+if [ -f "$PS4_PREFIX/lib/libssl.a" ] && [ -f "$PS4_PREFIX/lib/libcrypto.a" ] && [ -f "$STAMP" ]; then
   echo "openssl already built"
   exit 0
+fi
+
+# Drop cached outputs built with the previous no-sock/no-stdio configuration.
+if [ ! -f "$STAMP" ]; then
+  rm -rf "$SRC" "$PS4_PREFIX/include/openssl"
+  rm -f "$PS4_PREFIX/lib/libssl.a" "$PS4_PREFIX/lib/libcrypto.a" \
+    "$PS4_PREFIX/lib/pkgconfig/openssl.pc" "$STAMP"
 fi
 
 cd "$PS4_BUILD"
@@ -78,4 +86,5 @@ CROSS_CC="$CC -target x86_64-pc-freebsd12-elf --sysroot=$OO_PS4_TOOLCHAIN -nostd
 
 make -j"$(nproc)" build_libs
 make install_dev
+touch "$STAMP"
 echo "openssl OK"

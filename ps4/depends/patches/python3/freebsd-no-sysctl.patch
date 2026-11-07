@@ -29,3 +29,13 @@
      defined(__APPLE__)
  #  include <sys/sysctl.h>
  #endif
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -15281,1 +15281,5 @@
+-                                              name_len, direntp->d_ino
++                                              name_len,
++#ifdef __ORBIS__
++                                              0
++#else
++                                              direntp->d_ino
++#endif

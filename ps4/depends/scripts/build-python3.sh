@@ -70,6 +70,7 @@ cache=(
   ac_cv_func_system=no ac_cv_func_fork=no ac_cv_func_fork1=no
   ac_cv_func_vfork=no ac_cv_func_pthread_getname_np=no
   ac_cv_func_pthread_setname_np=no ac_cv_func_getentropy=yes
+  ac_cv_func_chflags=no
   ac_cv_func_getaddrinfo=yes
   ac_cv_buggy_getaddrinfo=no
   ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no
