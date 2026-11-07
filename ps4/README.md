@@ -41,8 +41,8 @@ Jeśli nadal czarny ekran – **to normalne na tym etapie**. Najważniejszy jest
 
 1. Poczekaj aż aplikacja sama wyjdzie (albo naciśnij PS).
 2. Pobierz log przez FTP:
-   - `/data/ps4mc/probe.log` (główny)
-   - awaryjnie `/mnt/usb0/ps4mc-probe.log`
+   - `/data/kodi/probe.log` (główny)
+   - awaryjnie `/mnt/usb0/kodi-probe.log`
 3. **Wklej całą zawartość logu** – na jego podstawie dobiorę dalszą ścieżkę (format, tiling, pamięć GPU, Piglet).
 
 ## Co dalej (po udanym logu)

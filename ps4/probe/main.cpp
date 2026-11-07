@@ -40,13 +40,13 @@ static void Log(const char* fmt, ...)
 static void OpenLog()
 {
     // Próbuje każdą ścieżkę po kolei
-    mkdir("/data/ps4mc", 0777);
-    mkdir("/data/ps4mc", 0755);
+    mkdir("/data/kodi", 0777);
+    mkdir("/data/kodi", 0755);
     const char* paths[] = {
-        "/data/ps4mc/probe.log",
-        "/mnt/usb0/ps4mc-probe.log",
-        "/mnt/usb1/ps4mc-probe.log",
-        "/tmp/ps4mc-probe.log",
+        "/data/kodi/probe.log",
+        "/mnt/usb0/kodi-probe.log",
+        "/mnt/usb1/kodi-probe.log",
+        "/tmp/kodi-probe.log",
         nullptr
     };
     for(int i=0; paths[i]; i++){

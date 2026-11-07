@@ -32,7 +32,7 @@ bool CPlatformPS4::InitStageOne()
   // launcher; use a writable per-title directory for settings, caches and
   // Python add-on state. /data is also used by the PS4 probe for persistent
   // diagnostics, while /tmp is a fallback for restricted setups.
-  constexpr const char* homeCandidates[] = {"/data/ps4mc", "/tmp/ps4mc"};
+  constexpr const char* homeCandidates[] = {"/data/kodi", "/tmp/kodi"};
   bool homeSet = false;
   for (const char* home : homeCandidates)
   {

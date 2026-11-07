@@ -51,11 +51,11 @@ static void ps4log(const char *fmt, ...)
 
 static void open_log(void)
 {
-    mkdir("/data/ps4mc", 0777);
+    mkdir("/data/kodi", 0777);
     const char *paths[] = {
-        "/data/ps4mc/probe.log",
-        "/mnt/usb0/ps4mc-probe.log",
-        "/tmp/ps4mc-probe.log",
+        "/data/kodi/probe.log",
+        "/mnt/usb0/kodi-probe.log",
+        "/tmp/kodi-probe.log",
         NULL
     };
     for (int i = 0; paths[i]; i++) {
@@ -453,7 +453,7 @@ int main(void)
     probe_pad();
     probe_piglet();
 
-    ps4log("DONE – wyślij cały /data/ps4mc/probe.log");
+    ps4log("DONE – wyślij cały /data/kodi/probe.log");
     ps4_exit();
     return 0;
 }
