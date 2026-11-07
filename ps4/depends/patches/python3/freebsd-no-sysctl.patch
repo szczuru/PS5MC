@@ -29,11 +29,3 @@
      defined(__APPLE__)
  #  include <sys/sysctl.h>
  #endif
-@@ -15279,4 +15279,4 @@
-             PyObject *module = PyType_GetModule(Py_TYPE(iterator));
-             entry = DirEntry_from_posix_info(module,
-                                              &iterator->path, direntp->d_name,
--                                             name_len, direntp->d_ino
-+                                             name_len, 0
- #ifdef HAVE_DIRENT_D_TYPE
-                                              , direntp->d_type

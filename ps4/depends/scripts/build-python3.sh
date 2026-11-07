@@ -39,6 +39,20 @@ patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/orbis-endian.patch"
 patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/orbis-memzero.patch"
 patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/orbis-getnameinfo.patch"
 
+# Orbis dirent does not provide a usable d_ino; use CPython's unknown inode
+# sentinel when constructing scandir entries.
+python3 - "$source_dir/Modules/posixmodule.c" <<'PY'
+from pathlib import Path
+import sys
+
+source = Path(sys.argv[1])
+text = source.read_text()
+old = "name_len, direntp->d_ino"
+if text.count(old) != 1:
+    raise SystemExit(f"expected one CPython dirent inode expression in {source}")
+source.write_text(text.replace(old, "name_len, 0", 1))
+PY
+
 # CPython 3.14 needs a matching native interpreter to generate its target
 # sysconfig and checked-hash stdlib bytecode.
 mkdir -p "$host_build"
