@@ -173,7 +173,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Narzędzia
         run: |
-          packages=(clang lld-18 llvm libc++-18-dev cmake ninja-build ccache curl git python3 libssl-dev pkg-config nasm autoconf automake libtool libtool-bin meson liblzo2-dev libpng-dev libgif-dev libjpeg-dev)
+          packages=(clang lld-18 llvm libc++-18-dev cmake ninja-build ccache curl git python3 libssl-dev pkg-config nasm autoconf automake libtool libtool-bin meson gperf liblzo2-dev libpng-dev libgif-dev libjpeg-dev)
           missing=()
           for package in "${packages[@]}"; do
             dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
