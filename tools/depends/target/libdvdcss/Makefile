@@ -20,6 +20,10 @@ CONFIGURE = $(NATIVEPREFIX)/bin/python3 $(NATIVEPREFIX)/bin/meson setup \
   -Denable_examples=false \
   . build
 
+ifeq ($(OS),freebsd)
+  CONFIGURE += -Dc_args=-DHAVE_BSD_DVD_STRUCT
+endif
+
 ifeq ($(TARGET_PLATFORM),webos)
   CONFIGURE += -DPATH_MAX=2048
 endif
