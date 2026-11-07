@@ -1,0 +1,20 @@
+--- a/Python/gc_free_threading.c
++++ b/Python/gc_free_threading.c
+@@ -24,7 +24,7 @@
+ #elif defined(__APPLE__)
+     #include <mach/mach.h>
+     #include <mach/task.h> // Required for TASK_VM_INFO
+     #include <unistd.h> // For sysconf, getpid
+-#elif defined(__FreeBSD__)
++#elif defined(__FreeBSD__) && !defined(__ORBIS__)
+     #include <sys/types.h>
+     #include <sys/sysctl.h>
+     #include <sys/user.h> // Requires sys/user.h for kinfo_proc definition
+@@ -1854,7 +1854,7 @@ get_process_mem_usage(void)
+     }
+     // phys_footprint is in bytes. Convert to KB.
+     return (Py_ssize_t)(vm_info.phys_footprint / 1024);
+-#elif defined(__FreeBSD__)
++#elif defined(__FreeBSD__) && !defined(__ORBIS__)
+     // NOTE: Returns RSS only. Per-process swap usage isn't readily available
+     long page_size_kb = sysconf(_SC_PAGESIZE) / 1024;

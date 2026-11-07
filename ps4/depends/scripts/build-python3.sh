@@ -34,6 +34,7 @@ tar -xf "$archive_path" --strip-components=1 -C "$source_dir"
 patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/cross-freebsd.patch"
 patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/no-subprocess.patch"
 patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/static-compile.patch"
+patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/freebsd-no-sysctl.patch"
 
 # CPython 3.14 needs a matching native interpreter to generate its target
 # sysconfig and checked-hash stdlib bytecode.
