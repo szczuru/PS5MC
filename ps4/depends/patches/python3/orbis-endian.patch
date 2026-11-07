@@ -1,0 +1,25 @@
+--- a/Modules/_hacl/include/krml/lowstar_endianness.h
++++ b/Modules/_hacl/include/krml/lowstar_endianness.h
+@@ -45,8 +45,22 @@
+ #  define be32toh(x) BE_32(x)
+ 
+ /* ... for the BSDs */
+-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
++#elif (defined(__FreeBSD__) && !defined(__ORBIS__)) || defined(__NetBSD__) || defined(__DragonFly__)
+ #  include <sys/endian.h>
++#elif defined(__ORBIS__)
++/* OpenOrbis targets little-endian x86_64 but omits sys/endian.h. */
++#  define htole16(x) (x)
++#  define le16toh(x) (x)
++#  define htobe16(x) __builtin_bswap16(x)
++#  define be16toh(x) __builtin_bswap16(x)
++#  define htole32(x) (x)
++#  define le32toh(x) (x)
++#  define htobe32(x) __builtin_bswap32(x)
++#  define be32toh(x) __builtin_bswap32(x)
++#  define htole64(x) (x)
++#  define le64toh(x) (x)
++#  define htobe64(x) __builtin_bswap64(x)
++#  define be64toh(x) __builtin_bswap64(x)
+ #elif defined(__OpenBSD__)
+ #  include <endian.h>
