@@ -1,0 +1,24 @@
+--- a/src/ioctl.c
++++ b/src/ioctl.c
+@@ -1076,6 +1076,10 @@
+     if (i_ret == 0)
+         memcpy(p_buffer, dvd.buffer, sizeof(dvd.bufferLength));
+ 
++#elif defined( HAVE_BSD_DVD_STRUCT )
++    /* PS4 DVD-Video uses CSS; CPRM disc structures are not implemented. */
++    i_ret = -1;
++
+ #else
+ #   error "DVD ioctls are unavailable on this system"
+ 
+@@ -1177,6 +1181,10 @@
+         memcpy( p_mkb_pack, p_buffer + 4, CPRM_MKB_PACK_SIZE );
+     }
+     return i_ret;
++
++#elif defined( HAVE_BSD_DVD_STRUCT )
++    /* PS4 DVD-Video uses CSS; CPRM disc structures are not implemented. */
++    i_ret = -1;
+ 
+ #else
+ #   error "DVD ioctls are unavailable on this system"

@@ -37,6 +37,7 @@ if(NOT TARGET LIBRARY::${CMAKE_FIND_PACKAGE_NAME})
       set(_libdvdcss_c_flags "${${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_C_FLAGS}")
       string(APPEND _libdvdcss_c_flags " -DHAVE_BSD_DVD_STRUCT -I${CORE_SOURCE_DIR}/ps4/toolchain/compat")
       set(${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_C_FLAGS "${_libdvdcss_c_flags}")
+      list(APPEND patches "${CORE_SOURCE_DIR}/ps4/depends/patches/libdvdcss-ps4-cprm.patch")
     endif()
 
     if(WIN32 OR WINDOWS_STORE)

@@ -68,7 +68,9 @@ endif()
 # OpenOrbis links with -nostdlib. FFmpeg's configure link checks (including
 # OpenSSL detection) therefore need the PS4 runtime libraries as trailing libs.
 if(CORE_SYSTEM_NAME STREQUAL ps4)
-  list(APPEND ffmpeg_conf "--extra-libs=-lkernel -lc -lm")
+  # OpenOrbis libc resolves DNS through libSceNet; FFmpeg's OpenSSL version
+  # probe pulls in that resolver object while linking the TLS test program.
+  list(APPEND ffmpeg_conf "--extra-libs=-lkernel -lc -lm -lSceNet")
 endif()
 
 if(ENABLE_NEON)
