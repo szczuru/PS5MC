@@ -9,6 +9,11 @@
 #include <orbis/UserService.h>
 #include <orbis/SystemService.h>
 
+#include <cerrno>
+#include <cstdlib>
+#include <sys/stat.h>
+#include <unistd.h>
+
 bool CPlatformPS4::InitStageOne()
 {
   CLog::Log(LOGINFO, "PS4: InitStageOne");
@@ -21,6 +26,33 @@ bool CPlatformPS4::InitStageOne()
     const auto mountResult = PS4Privileges::MountDisc();
     CLog::Log(LOGINFO, "PS4: Mount optical drive -> {}",
               PS4Privileges::ResultStr(mountResult));
+  }
+
+  // Kodi's POSIX startup requires HOME. PS4 titles do not get one from the
+  // launcher; use a writable per-title directory for settings, caches and
+  // Python add-on state. /data is also used by the PS4 probe for persistent
+  // diagnostics, while /tmp is a fallback for restricted setups.
+  constexpr const char* homeCandidates[] = {"/data/ps4mc", "/tmp/ps4mc"};
+  bool homeSet = false;
+  for (const char* home : homeCandidates)
+  {
+    if (mkdir(home, 0777) != 0 && errno != EEXIST)
+      continue;
+    struct stat st{};
+    if (stat(home, &st) != 0 || !S_ISDIR(st.st_mode) || access(home, W_OK) != 0)
+      continue;
+    if (setenv("HOME", home, 1) == 0)
+    {
+      setenv("TMPDIR", home, 1);
+      CLog::Log(LOGINFO, "PS4: HOME set to {}", home);
+      homeSet = true;
+      break;
+    }
+  }
+  if (!homeSet)
+  {
+    CLog::Log(LOGERROR, "PS4: could not create a writable HOME (errno {})", errno);
+    return false;
   }
 
   sceUserServiceInitialize(nullptr);
