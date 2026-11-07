@@ -1,11 +1,27 @@
 --- a/Modules/getnameinfo.c
 +++ b/Modules/getnameinfo.c
-@@ -163 +163 @@
+@@ -170,7 +170,7 @@
+             return ENI_MEMORY;
+         strcpy(host, numaddr);
+     } else {
 -#ifdef ENABLE_IPV6
 +#if defined(ENABLE_IPV6) && !defined(__ORBIS__)
-@@ -174 +174 @@
+         hp = getipnodebyaddr(addr, gni_afd->a_addrlen, gni_afd->a_af, &h_error);
+ #else
+         hp = gethostbyaddr(addr, gni_afd->a_addrlen, gni_afd->a_af);
+@@ -182,13 +182,13 @@
+                 if (p) *p = '\0';
+             }
+             if (strlen(hp->h_name) > hostlen) {
 -#ifdef ENABLE_IPV6
 +#if defined(ENABLE_IPV6) && !defined(__ORBIS__)
-@@ -180 +180 @@
+                 freehostent(hp);
+ #endif
+                 return ENI_MEMORY;
+             }
+             strcpy(host, hp->h_name);
 -#ifdef ENABLE_IPV6
 +#if defined(ENABLE_IPV6) && !defined(__ORBIS__)
+             freehostent(hp);
+ #endif
+         } else {

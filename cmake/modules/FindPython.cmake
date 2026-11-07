@@ -80,6 +80,7 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
       # extension modules. KODI_DEPENDSBUILD is off for the OpenOrbis build,
       # so provide the target libraries those modules need explicitly.
       set(Py_LINK_LIBRARIES
+          "${PS4_PREFIX}/lib/libpython${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}-expat.a"
           "${PS4_PREFIX}/lib/libssl.a"
           "${PS4_PREFIX}/lib/libcrypto.a"
           "${PS4_PREFIX}/lib/libbz2.a"
