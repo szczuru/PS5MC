@@ -37,6 +37,7 @@ patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/static-compile.patc
 patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/freebsd-no-sysctl.patch"
 patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/orbis-endian.patch"
 patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/orbis-memzero.patch"
+patch -d "$source_dir" -p1 -i "$root/depends/patches/python3/orbis-getnameinfo.patch"
 
 # CPython 3.14 needs a matching native interpreter to generate its target
 # sysconfig and checked-hash stdlib bytecode.
