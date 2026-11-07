@@ -1,0 +1,25 @@
+CPython refuses cross builds for hosts it does not list; OpenOrbis uses an
+x86_64-pc-freebsd12-elf target.
+
+--- a/configure
++++ b/configure
+@@ -4124,6 +4124,9 @@
+ 	*-*-vxworks*)
+ 	    ac_sys_system=VxWorks
+ 	    ;;
++	*-*-freebsd*)
++	    ac_sys_system=FreeBSD
++	    ;;
+ 	*-*-emscripten)
+ 	    ac_sys_system=Emscripten
+ 	    ;;
+@@ -4628,6 +4631,9 @@
+ 	*-*-vxworks*)
+ 		_host_ident=$host_cpu
+ 		;;
++	*-*-freebsd*)
++		_host_ident=$host_cpu
++		;;
+ 	*-*-emscripten)
+ 		_host_ident=$(emcc -dumpversion | cut -f1 -d-)-$host_cpu
+ 		;;

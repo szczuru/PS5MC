@@ -7,6 +7,7 @@
 
 #include <cstdio>
 #include <cstdarg>
+#include <cstdlib>
 #include <cstring>
 #include <unistd.h>
 
@@ -27,6 +28,10 @@ void PS4Log(const char* fmt, ...)
 
 extern "C" int main(int /*argc*/, char* /*argv*/[])
 {
+  setenv("PYTHONHOME", "/app0", 0);
+  setenv("PYTHONNOUSERSITE", "1", 1);
+  setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
+  setenv("SSL_CERT_FILE", "/app0/share/kodi/system/certs/cacert.pem", 0);
   PS4Log("PS4MC main() starting");
 
   int status = XBMC_Run(true);

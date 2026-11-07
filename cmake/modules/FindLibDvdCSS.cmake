@@ -35,7 +35,7 @@ if(NOT TARGET LIBRARY::${CMAKE_FIND_PACKAGE_NAME})
       # Provide the matching ABI declarations so libdvdcss can use the native
       # FreeBSD DVD authentication and structure ioctls on PS4.
       set(_libdvdcss_c_flags "${${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_C_FLAGS}")
-      string(APPEND _libdvdcss_c_flags " -I${CORE_SOURCE_DIR}/ps4/toolchain/compat")
+      string(APPEND _libdvdcss_c_flags " -DHAVE_BSD_DVD_STRUCT -I${CORE_SOURCE_DIR}/ps4/toolchain/compat")
       set(${${CMAKE_FIND_PACKAGE_NAME}_MODULE}_C_FLAGS "${_libdvdcss_c_flags}")
     endif()
 

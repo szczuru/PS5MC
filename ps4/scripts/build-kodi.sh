@@ -98,6 +98,7 @@ trap dump_ffmpeg_config_log_on_failure EXIT
 "$root/ps4/depends/scripts/build-nghttp2.sh"
 "$root/ps4/depends/scripts/build-sqlite3.sh"
 "$root/ps4/depends/scripts/build-tinyxml.sh"
+"$root/ps4/depends/scripts/build-python3.sh"
 
 # TexturePacker runs on the build host while generating Kodi skin assets.
 host_tools="$root/ps4/build/host-texturepacker"
@@ -126,7 +127,7 @@ cp -a "$root/ps4/overlay/xbmc/platform/ps4" "$root/xbmc/platform/"
 cp -a "$root/ps4/overlay/xbmc/windowing/ps4" "$root/xbmc/windowing/"
 
 # OpenOrbis omits FreeBSD's DVD CSS ioctl header; use the matching FreeBSD 12 ABI shim.
-cmake -S "$root" -B "$build" -G Ninja \
+cmake -S "$root" -B "$build" -U "Python3_*" -U "PYTHON_*" -G Ninja \
   -DCMAKE_TOOLCHAIN_FILE="$root/ps4/toolchain/ps4-kodi.cmake" \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=/app0 \
@@ -139,7 +140,11 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DENABLE_OPTICAL=ON \
   -DENABLE_DVDCSS=ON \
   -DENABLE_INTERNAL_LIBDVD=ON \
-  -DENABLE_PYTHON=OFF \
+  -DENABLE_PYTHON=ON \
+  -DENABLE_INTERNAL_SWIG=ON \
+  -DPython3_USE_STATIC_LIBS=ON \
+  -DPython3_INCLUDE_DIR:PATH="$prefix/include/python3.14" \
+  -DPython3_LIBRARY:FILEPATH="$prefix/lib/libpython3.14.a" \
   -DENABLE_CEC=OFF \
   -DENABLE_INTERNAL_BLURAY=OFF \
   -DENABLE_AIRTUNES=OFF \
@@ -182,6 +187,8 @@ cmake --build "$build" --parallel "${PS4_BUILD_JOBS:-2}" -- -k 0
 
 rm -rf "$stage"
 DESTDIR="$stage" cmake --install "$build"
+mkdir -p "$stage/app0/lib/python3.14"
+cp -a "$prefix/lib/python3.14"/. "$stage/app0/lib/python3.14/"
 mkdir -p "$out"
 "$here/make-pkg.sh" "$build/kodi.elf" "$out" \
   "Kodi PS4" PSMC00001 IV0000-PSMC00001_00-KODIPROBE0000000 01.00 "$stage/app0"

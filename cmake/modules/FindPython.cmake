@@ -75,6 +75,17 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
       endif()
 
       set(Py_LINK_LIBRARIES EXPAT::EXPAT ${FFI_LIBRARY} ${GMP_LIBRARY} LIBRARY::Iconv Intl::Intl LibLZMA::LibLZMA ${PYTHON_DEP_LIBRARIES})
+    elseif(CORE_SYSTEM_NAME STREQUAL ps4)
+      # PS4 embeds CPython as a static archive assembled with these optional
+      # extension modules. KODI_DEPENDSBUILD is off for the OpenOrbis build,
+      # so provide the target libraries those modules need explicitly.
+      set(Py_LINK_LIBRARIES
+          "${PS4_PREFIX}/lib/libssl.a"
+          "${PS4_PREFIX}/lib/libcrypto.a"
+          "${PS4_PREFIX}/lib/libbz2.a"
+          "${PS4_PREFIX}/lib/libsqlite3.a"
+          "${PS4_PREFIX}/lib/libz.a"
+          pthread m)
     endif()
 
     # We use this all over the place. Maybe it would be nice to keep it as a TARGET property
