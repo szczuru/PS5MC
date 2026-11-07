@@ -72,7 +72,10 @@ cache=(
 mkdir -p "$target_build"
 (
   cd "$target_build"
-  env "${cache[@]}" "$source_dir/configure" \
+  env "${cache[@]}" \
+    LDFLAGS="$LDFLAGS -nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x -Wl,--eh-frame-hdr -L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib" \
+    LIBS="-lc -lkernel -lSceSysmodule -lm $OO_PS4_TOOLCHAIN/lib/crt1.o" \
+    "$source_dir/configure" \
     --prefix=/app0 --host=x86_64-pc-freebsd --build=x86_64-pc-linux-gnu \
     --disable-shared --without-ensurepip --disable-framework --without-pymalloc \
     --with-build-python="$host_build/python" --with-system-expat=no \
