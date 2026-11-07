@@ -32,13 +32,13 @@
 @@ -15279,6 +15279,11 @@
              PyObject *module = PyType_GetModule(Py_TYPE(iterator));
              entry = DirEntry_from_posix_info(module,
-                                              &iterator->path, direntp->d_name,
--                                              name_len, direntp->d_ino
-+                                              name_len,
+                                             &iterator->path, direntp->d_name,
+-                                             name_len, direntp->d_ino
++                                             name_len,
 +#ifdef __ORBIS__
-+                                              0
++                                             0
 +#else
-+                                              direntp->d_ino
++                                             direntp->d_ino
 +#endif
  #ifdef HAVE_DIRENT_D_TYPE
                                               , direntp->d_type
