@@ -72,6 +72,7 @@ cache=(
   ac_cv_func_getaddrinfo=yes
   ac_cv_buggy_getaddrinfo=no
   ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no
+  ac_cv_header_stropts_h=no
   ac_cv_working_openssl_ssl=yes ac_cv_working_openssl_hashlib=yes
 )
 
