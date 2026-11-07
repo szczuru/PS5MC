@@ -18,3 +18,14 @@
 +#elif defined(__FreeBSD__) && !defined(__ORBIS__)
      // NOTE: Returns RSS only. Per-process swap usage isn't readily available
      long page_size_kb = sysconf(_SC_PAGESIZE) / 1024;
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -135,7 +135,7 @@
+ #if defined(__DragonFly__) || \
+     defined(__OpenBSD__)   || \
+-    defined(__FreeBSD__)   || \
++    (defined(__FreeBSD__) && !defined(__ORBIS__)) || \
+     defined(__NetBSD__)    || \
+     defined(__APPLE__)
+ #  include <sys/sysctl.h>
+ #endif

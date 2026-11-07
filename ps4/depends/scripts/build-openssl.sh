@@ -67,8 +67,8 @@ CROSS_CC="$CC -target x86_64-pc-freebsd12-elf --sysroot=$OO_PS4_TOOLCHAIN -nostd
 # - asm, shared, engines (devcrypto expects crypto/cryptodev.h), tests
 ./Configure BSD-generic64 \
   no-shared no-dso no-engine no-async no-tests no-ui-console no-asm \
-  no-sock no-dgram no-dtls no-dtls1 no-dtls1_2 \
-  no-stdio no-afalgeng \
+  no-dgram no-dtls no-dtls1 no-dtls1_2 \
+  no-afalgeng \
   --prefix="$PS4_PREFIX" \
   --openssldir="$PS4_PREFIX/ssl" \
   -D__PS4__ -D__ORBIS__ \
