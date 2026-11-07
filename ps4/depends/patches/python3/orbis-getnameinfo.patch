@@ -1,26 +1,11 @@
 --- a/Modules/getnameinfo.c
 +++ b/Modules/getnameinfo.c
-@@ -160,7 +160,7 @@ getnameinfo(const struct sockaddr *sa, size_t salen, char *host, size_t hostlen,
-         strcpy(host, numaddr);
-     } else {
+@@ -163 +163 @@
 -#ifdef ENABLE_IPV6
 +#if defined(ENABLE_IPV6) && !defined(__ORBIS__)
-         hp = getipnodebyaddr(addr, gni_afd->a_addrlen, gni_afd->a_af, &h_error);
- #else
-         hp = gethostbyaddr(addr, gni_afd->a_addrlen, gni_afd->a_af);
-@@ -171,14 +171,14 @@ getnameinfo(const struct sockaddr *sa, size_t salen, char *host, size_t hostlen,
-                 p = strchr(hp->h_name, '.');
-                 if (p) *p = '\0';
-             }
-             if (strlen(hp->h_name) > hostlen) {
+@@ -174 +174 @@
 -#ifdef ENABLE_IPV6
 +#if defined(ENABLE_IPV6) && !defined(__ORBIS__)
-                 freehostent(hp);
- #endif
-                 return ENI_MEMORY;
-             }
-             strcpy(host, hp->h_name);
+@@ -180 +180 @@
 -#ifdef ENABLE_IPV6
 +#if defined(ENABLE_IPV6) && !defined(__ORBIS__)
-             freehostent(hp);
- #endif
