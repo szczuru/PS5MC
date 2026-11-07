@@ -44,7 +44,7 @@ mkdir -p "$host_build"
     CFLAGS= CPPFLAGS= LDFLAGS= \
     "$source_dir/configure" --without-ensurepip --disable-test-modules
   env CC=/usr/bin/cc CXX=/usr/bin/c++ AR=/usr/bin/ar RANLIB=/usr/bin/ranlib \
-    make -j"$jobs" python
+    CFLAGS= CPPFLAGS= LDFLAGS= make -j"$jobs" python
 )
 
 modules=(
