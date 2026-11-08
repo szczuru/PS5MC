@@ -99,6 +99,17 @@ void PS4BootLogPromoteToData(void)
   PS4BootLog("Startup log moved to /data/kodi/startup.log");
 }
 
+// OpenOrbis musl calls the executable's _init hook before walking its
+// .init_array. This gives us a persistent marker even if a later C++ static
+// initializer crashes before main().
+void _init(void);
+void _init(void)
+{
+  OpenBootLog();
+  PS4BootLog("PS4 executable _init reached; log: %s",
+             g_logpath ? g_logpath : "unavailable");
+}
+
 __attribute__((constructor(101))) static void PS4EarlyBootLog(void)
 {
   OpenBootLog();
