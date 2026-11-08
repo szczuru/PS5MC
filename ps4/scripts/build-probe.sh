@@ -55,5 +55,5 @@ ls -la "$out/ps4-kodi-startup-probe.elf"
 
 echo "==> PKG..."
 "$here/make-pkg.sh" "$out/ps4-kodi-startup-probe.elf" "$out" \
-  "Kodi startup probe" PS4PB0001 \
-  IV0000-PS4PB0001_00-KODIPROBE0000000 01.00
+  "Kodi startup probe" PSMC00009 \
+  IV0000-PSMC00009_00-KODIPROBE0000000 01.00
