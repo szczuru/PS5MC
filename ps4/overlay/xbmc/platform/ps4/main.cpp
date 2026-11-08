@@ -52,7 +52,7 @@ void PS4BootLogPromoteToData()
     return;
 
   mkdir("/data/kodi", 0777);
-  const int dataLogfd = open("/data/kodi/startup.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
+  const int dataLogfd = open("/data/kodi/startup.log", O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (dataLogfd < 0)
   {
     PS4BootLog("Could not open /data/kodi/startup.log after privilege escalation (errno=%d)",
@@ -60,10 +60,24 @@ void PS4BootLogPromoteToData()
     return;
   }
 
+  if (g_logpath)
+  {
+    const int previousLogfd = open(g_logpath, O_RDONLY);
+    if (previousLogfd >= 0)
+    {
+      char previousLog[512];
+      ssize_t bytesRead;
+      while ((bytesRead = read(previousLogfd, previousLog, sizeof(previousLog))) > 0)
+        write(dataLogfd, previousLog, static_cast<size_t>(bytesRead));
+      close(previousLogfd);
+    }
+  }
+
   if (g_logfd >= 0)
     close(g_logfd);
   g_logfd = dataLogfd;
   g_logpath = "/data/kodi/startup.log";
+  fsync(g_logfd);
   PS4BootLog("Startup log moved to /data/kodi/startup.log");
 }
 
