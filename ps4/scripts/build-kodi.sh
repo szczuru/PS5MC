@@ -145,7 +145,7 @@ clang --target=x86_64-pc-freebsd12-elf -nostdlib -fuse-ld=lld -pie \
   "$ctor_probe/probe.o" -lc -lkernel -lm "$OO_PS4_TOOLCHAIN/lib/crt1.o" \
   -o "$ctor_probe/probe.elf"
 if ! "$readelf_tool" -W -d "$ctor_probe/probe.elf" | grep -E '\(INIT_ARRAY\)' >/dev/null || \
-   ! "$readelf_tool" -W -d "$ctor_probe/probe.elf" | grep -E '\(INIT_ARRAYSZ\)[[:space:]]+0x([1-9a-fA-F][0-9a-fA-F]*)' >/dev/null; then
+   ! "$readelf_tool" -W -d "$ctor_probe/probe.elf" | grep -E '\(INIT_ARRAYSZ\)[[:space:]]+(0x[1-9a-fA-F][0-9a-fA-F]*|[1-9][0-9]*)' >/dev/null; then
   echo "ERROR: patched linker script does not emit a non-empty constructor array" >&2
   "$readelf_tool" -W -S "$ctor_probe/probe.elf" | grep -E 'init_array|dynamic' || true
   "$readelf_tool" -W -d "$ctor_probe/probe.elf" || true
@@ -269,7 +269,7 @@ if [ -z "$readelf_tool" ]; then
   exit 1
 fi
 if ! "$readelf_tool" -W -d "$build/kodi.elf" | grep -E '\(INIT_ARRAY\)' >/dev/null || \
-   ! "$readelf_tool" -W -d "$build/kodi.elf" | grep -E '\(INIT_ARRAYSZ\)[[:space:]]+0x([1-9a-fA-F][0-9a-fA-F]*)' >/dev/null; then
+   ! "$readelf_tool" -W -d "$build/kodi.elf" | grep -E '\(INIT_ARRAYSZ\)[[:space:]]+(0x[1-9a-fA-F][0-9a-fA-F]*|[1-9][0-9]*)' >/dev/null; then
   echo "ERROR: kodi.elf has no non-empty constructor array" >&2
   exit 1
 fi
