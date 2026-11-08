@@ -9,6 +9,7 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
+#include <cerrno>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -30,6 +31,12 @@ void OpenBootLog()
     g_logpath = "/data/kodi/startup.log";
     return;
   }
+  g_logfd = open("/mnt/usb0/kodi-startup.log", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (g_logfd >= 0)
+  {
+    g_logpath = "/mnt/usb0/kodi-startup.log";
+    return;
+  }
   if (g_logfd < 0)
   {
     g_logfd = open("/tmp/kodi-startup.log", O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -38,6 +45,27 @@ void OpenBootLog()
   }
 }
 } // namespace
+
+void PS4BootLogPromoteToData()
+{
+  if (g_logpath && strcmp(g_logpath, "/data/kodi/startup.log") == 0)
+    return;
+
+  mkdir("/data/kodi", 0777);
+  const int dataLogfd = open("/data/kodi/startup.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
+  if (dataLogfd < 0)
+  {
+    PS4BootLog("Could not open /data/kodi/startup.log after privilege escalation (errno=%d)",
+               errno);
+    return;
+  }
+
+  if (g_logfd >= 0)
+    close(g_logfd);
+  g_logfd = dataLogfd;
+  g_logpath = "/data/kodi/startup.log";
+  PS4BootLog("Startup log moved to /data/kodi/startup.log");
+}
 
 void PS4BootLog(const char* fmt, ...)
 {

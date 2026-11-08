@@ -22,6 +22,7 @@ bool CPlatformPS4::InitStageOne()
 
   // Escalate privileges (libXcape / jbc) – needed for disc, full FS, etc.
   auto r = PS4Privileges::Escalate();
+  PS4BootLogPromoteToData();
   PS4BootLog("Privilege escalation: %s", PS4Privileges::ResultStr(r));
   CLog::Log(LOGINFO, "PS4: Escalate privileges -> {}", PS4Privileges::ResultStr(r));
   if (r == PS4Privileges::Result::OK || r == PS4Privileges::Result::AlreadyDone)
