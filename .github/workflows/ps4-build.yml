@@ -6,6 +6,9 @@ on:
     branches: [ps4-kodi-piers]
     paths:
       - 'ps4/**'
+      - 'xbmc/**'
+      - 'tools/depends/target/python3/**'
+      - 'tools/depends/target/expat/**'
       - 'xbmc/cores/VideoPlayer/VideoRenderers/**'
       - 'cmake/platform/ps4/**'
       - 'xbmc/platform/posix/PosixMountProvider.cpp'

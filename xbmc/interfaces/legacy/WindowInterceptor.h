@@ -29,7 +29,13 @@ namespace XBMCAddon
     protected:
       AddonClass::Ref<Window> window;
       // This instance is in Window.cpp
+#if defined(__PS4__)
+      // PS4's FSELF tooling cannot resolve the C++ TLS initialization thunk
+      // for this trivial pointer. GNU TLS needs no per-thread initializer.
+      static __thread ref* upcallTls;
+#else
       static thread_local ref* upcallTls;
+#endif
 
       InterceptorBase() : window(NULL) { upcallTls = NULL; }
 

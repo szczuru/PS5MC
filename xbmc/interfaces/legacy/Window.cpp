@@ -30,7 +30,11 @@ namespace XBMCAddon
 {
   namespace xbmcgui
   {
+#if defined(__PS4__)
+    __thread ref* InterceptorBase::upcallTls;
+#else
     thread_local ref* InterceptorBase::upcallTls = nullptr;
+#endif
 
     /**
      * Used in add/remove control. It only locks if it's given a
