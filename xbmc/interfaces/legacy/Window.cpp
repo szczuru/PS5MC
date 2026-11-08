@@ -30,7 +30,7 @@ namespace XBMCAddon
 {
   namespace xbmcgui
   {
-    thread_local ref* InterceptorBase::upcallTls;
+    thread_local ref* InterceptorBase::upcallTls = nullptr;
 
     /**
      * Used in add/remove control. It only locks if it's given a
