@@ -102,7 +102,7 @@ mkdir -p "$target_build"
     "$source_dir/configure" \
     --prefix=/app0 --host=x86_64-pc-freebsd --build=x86_64-pc-linux-gnu \
     --disable-shared --without-ensurepip --disable-framework --without-mimalloc --without-pymalloc \
-    --with-build-python="$host_build/python" --with-system-expat=no \
+    --with-build-python="$host_build/python" --with-system-expat=yes \
     --with-openssl="$PS4_PREFIX" --disable-test-modules \
     MODULE_BUILDTYPE=static "${modules[@]}"
 
@@ -120,12 +120,6 @@ mkdir -p "$target_build"
 
 install -d "$PS4_PREFIX/lib" "$PS4_PREFIX/lib/python$abi_version"
 install -m 0644 "$target_build/libpython$abi_version.a" "$PS4_PREFIX/lib/"
-test -f "$target_build/Modules/expat/libexpat.a" || {
-  echo "CPython target did not build its bundled Expat archive" >&2
-  exit 1
-}
-install -m 0644 "$target_build/Modules/expat/libexpat.a" \
-  "$PS4_PREFIX/lib/libpython$abi_version-expat.a"
 install -d "$PS4_PREFIX/include/python$abi_version"
 cp -a "$source_dir/Include"/. "$PS4_PREFIX/include/python$abi_version/"
 install -m 0644 "$target_build/pyconfig.h" "$PS4_PREFIX/include/python$abi_version/pyconfig.h"
