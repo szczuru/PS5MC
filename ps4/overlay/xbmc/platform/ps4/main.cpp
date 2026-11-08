@@ -37,6 +37,12 @@ void OpenBootLog()
     g_logpath = "/mnt/usb0/kodi-startup.log";
     return;
   }
+  g_logfd = open("/mnt/usb1/kodi-startup.log", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (g_logfd >= 0)
+  {
+    g_logpath = "/mnt/usb1/kodi-startup.log";
+    return;
+  }
   if (g_logfd < 0)
   {
     g_logfd = open("/tmp/kodi-startup.log", O_WRONLY | O_CREAT | O_TRUNC, 0644);

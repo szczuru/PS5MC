@@ -185,6 +185,24 @@ fi
 # reports multiple missing PS4 adaptations instead of stopping at the first.
 cmake --build "$build" --parallel "${PS4_BUILD_JOBS:-2}" -- -k 0
 
+# A green build is not enough if the early diagnostic entry point is dropped
+# from the final ELF. Verify both the ordinary entry point and its constructor
+# before producing a PKG that cannot help diagnose a pre-main crash.
+nm_tool="$(command -v llvm-nm || command -v nm || true)"
+if [ -z "$nm_tool" ]; then
+  echo "ERROR: llvm-nm/nm is required to validate the PS4 ELF" >&2
+  exit 1
+fi
+if ! "$nm_tool" -a "$build/kodi.elf" | grep -E '[[:space:]]main$' >/dev/null; then
+  echo "ERROR: main is missing from $build/kodi.elf" >&2
+  exit 1
+fi
+if ! "$nm_tool" -a -C "$build/kodi.elf" | grep -E '[[:space:]]PS4EarlyBootLog\(\)$' >/dev/null; then
+  echo "ERROR: PS4EarlyBootLog is missing from $build/kodi.elf" >&2
+  exit 1
+fi
+echo "Verified main and PS4EarlyBootLog are present in kodi.elf"
+
 rm -rf "$stage"
 DESTDIR="$stage" cmake --install "$build"
 mkdir -p "$stage/app0/lib/python3.14"
