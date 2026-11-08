@@ -1,5 +1,6 @@
 #include "WinSystemPS4.h"
 #include "platform/ps4/input/PS4PadInput.h"
+#include "platform/ps4/PS4BootLog.h"
 
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 #include "cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h"
@@ -37,9 +38,11 @@ std::unique_ptr<CWinSystemBase> CWinSystemPS4::CreateWinSystem()
 
 bool CWinSystemPS4::LoadPigletModules()
 {
+  PS4BootLog("Loading Piglet modules");
   const char* sandbox = sceKernelGetFsSandboxRandomWord();
   if (!sandbox || !*sandbox)
   {
+    PS4BootLog("No sandbox name returned for Piglet module loading");
     CLog::Log(LOGERROR, "PS4: no sandbox name for Piglet modules");
     return false;
   }
@@ -47,21 +50,32 @@ bool CWinSystemPS4::LoadPigletModules()
   int moduleResult = 0;
   const auto load = [sandbox, &moduleResult](const char* module) {
     const std::string path = std::string("/") + sandbox + "/common/lib/" + module;
+    PS4BootLog("Loading system module: %s", path.c_str());
     const int32_t result = sceKernelLoadStartModule(path.c_str(), 0, nullptr, 0, nullptr,
                                                     &moduleResult);
+    PS4BootLog("System module result for %s: 0x%08x", module,
+               static_cast<uint32_t>(result));
     if (result < 0 && result != static_cast<int32_t>(0x80020008u))
       CLog::Log(LOGERROR, "PS4: loading {} failed: {:#x}", path, result);
     return result >= 0 || result == static_cast<int32_t>(0x80020008u);
   };
 
-  return load("libScePigletv2VSH.sprx") && load("libScePrecompiledShaders.sprx");
+  const bool loaded = load("libScePigletv2VSH.sprx") && load("libScePrecompiledShaders.sprx");
+  PS4BootLog("Piglet modules: %s", loaded ? "loaded" : "failed");
+  return loaded;
 }
 
 bool CWinSystemPS4::CreateContext()
 {
-  if (!m_eglContext.CreateDisplay(EGL_DEFAULT_DISPLAY) ||
-      !m_eglContext.InitializeDisplay(EGL_OPENGL_ES_API) ||
-      !m_eglContext.ChooseConfig(EGL_OPENGL_ES2_BIT))
+  PS4BootLog("Creating Piglet EGL display");
+  const bool displayCreated = m_eglContext.CreateDisplay(EGL_DEFAULT_DISPLAY);
+  PS4BootLog("EGL display creation: %s", displayCreated ? "ok" : "failed");
+  const bool displayInitialized =
+      displayCreated && m_eglContext.InitializeDisplay(EGL_OPENGL_ES_API);
+  PS4BootLog("EGL display initialization: %s", displayInitialized ? "ok" : "failed");
+  const bool configChosen = displayInitialized && m_eglContext.ChooseConfig(EGL_OPENGL_ES2_BIT);
+  PS4BootLog("EGL config selection: %s", configChosen ? "ok" : "failed");
+  if (!configChosen)
   {
     CEGLUtils::Log(LOGERROR, "PS4: Piglet EGL display/config initialization failed");
     return false;
@@ -69,18 +83,25 @@ bool CWinSystemPS4::CreateContext()
 
   CEGLAttributesVec contextAttributes;
   contextAttributes.Add({{EGL_CONTEXT_CLIENT_VERSION, 2}});
-  if (!m_eglContext.CreateContext(contextAttributes))
+  const bool contextCreated = m_eglContext.CreateContext(contextAttributes);
+  PS4BootLog("EGL context creation: %s", contextCreated ? "ok" : "failed");
+  if (!contextCreated)
   {
     CEGLUtils::Log(LOGERROR, "PS4: Piglet GLES2 context creation failed");
     return false;
   }
+  PS4BootLog("Piglet EGL context created");
   return true;
 }
 
 bool CWinSystemPS4::InitWindowSystem()
 {
+  PS4BootLog("Window-system initialization entered");
   if (!CWinSystemBase::InitWindowSystem())
+  {
+    PS4BootLog("Base window-system initialization failed");
     return false;
+  }
 
   VIDEOPLAYER::CRendererFactory::ClearRenderer();
   CLinuxRendererGLES::Register();
@@ -103,7 +124,9 @@ bool CWinSystemPS4::InitWindowSystem()
   config.unk_0x5C = 2;
   // The standalone PS4 probe treats negative SCE results as errors. A zero
   // return is success, so a boolean check would reject successful setup.
+  PS4BootLog("Configuring Piglet VideoOut");
   const int32_t pigletResult = scePigletSetConfigurationVSH(&config);
+  PS4BootLog("scePigletSetConfigurationVSH: 0x%08x", static_cast<uint32_t>(pigletResult));
   if (pigletResult < 0)
   {
     CLog::Log(LOGERROR, "PS4: scePigletSetConfigurationVSH failed: {:#x}",
@@ -119,12 +142,14 @@ bool CWinSystemPS4::InitWindowSystem()
   CLog::Log(LOGINFO, "PS4: Piglet EGL/GLES2 initialized");
 
   m_padInput = std::make_unique<CPS4PadInput>();
+  PS4BootLog("Initializing controller input");
   if (!m_padInput->Initialize())
   {
     CLog::Log(LOGERROR, "PS4: controller input initialization failed");
     m_padInput.reset();
     return false;
   }
+  PS4BootLog("Window-system initialization complete");
   return true;
 }
 
@@ -145,12 +170,17 @@ bool CWinSystemPS4::CreateNewWindow(const std::string& name,
                                    bool fullScreen,
                                    RESOLUTION_INFO& res)
 {
+  PS4BootLog("Creating Kodi VideoOut surface");
   DestroyWindow();
   m_nWidth = res.iWidth > 0 ? res.iWidth : 1920;
   m_nHeight = res.iHeight > 0 ? res.iHeight : 1080;
   m_nativeWindow = {0, static_cast<uint32_t>(m_nWidth), static_cast<uint32_t>(m_nHeight), 0};
 
-  if (!m_eglContext.CreateSurface(&m_nativeWindow) || !m_eglContext.BindContext())
+  const bool surfaceCreated = m_eglContext.CreateSurface(&m_nativeWindow);
+  PS4BootLog("EGL surface creation: %s", surfaceCreated ? "ok" : "failed");
+  const bool contextBound = surfaceCreated && m_eglContext.BindContext();
+  PS4BootLog("EGL context bind: %s", contextBound ? "ok" : "failed");
+  if (!contextBound)
   {
     CEGLUtils::Log(LOGERROR, "PS4: Piglet EGL surface creation/bind failed");
     m_eglContext.DestroySurface();

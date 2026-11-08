@@ -1,5 +1,6 @@
 // xbmc/platform/ps4/PlatformPS4.cpp
 #include "PlatformPS4.h"
+#include "PS4BootLog.h"
 #include "PS4Privileges.h"
 #include "platform/ps4/video/VideoCodecRegistration.h"
 #include "platform/ps4/video/VideoDec2PS4.h"
@@ -16,14 +17,18 @@
 
 bool CPlatformPS4::InitStageOne()
 {
+  PS4BootLog("Platform InitStageOne entered");
   CLog::Log(LOGINFO, "PS4: InitStageOne");
 
   // Escalate privileges (libXcape / jbc) – needed for disc, full FS, etc.
   auto r = PS4Privileges::Escalate();
+  PS4BootLog("Privilege escalation: %s", PS4Privileges::ResultStr(r));
   CLog::Log(LOGINFO, "PS4: Escalate privileges -> {}", PS4Privileges::ResultStr(r));
   if (r == PS4Privileges::Result::OK || r == PS4Privileges::Result::AlreadyDone)
   {
+    PS4BootLog("Mounting optical drive");
     const auto mountResult = PS4Privileges::MountDisc();
+    PS4BootLog("Optical mount: %s", PS4Privileges::ResultStr(mountResult));
     CLog::Log(LOGINFO, "PS4: Mount optical drive -> {}",
               PS4Privileges::ResultStr(mountResult));
   }
@@ -45,27 +50,37 @@ bool CPlatformPS4::InitStageOne()
     {
       setenv("TMPDIR", home, 1);
       CLog::Log(LOGINFO, "PS4: HOME set to {}", home);
+      PS4BootLog("Writable HOME: %s", home);
       homeSet = true;
       break;
     }
   }
   if (!homeSet)
   {
+    PS4BootLog("Failed to create writable HOME, errno=%d", errno);
     CLog::Log(LOGERROR, "PS4: could not create a writable HOME (errno {})", errno);
     return false;
   }
 
-  sceUserServiceInitialize(nullptr);
+  PS4BootLog("Initializing user service");
+  const int32_t userServiceResult = sceUserServiceInitialize(nullptr);
+  PS4BootLog("User service result: 0x%08x", static_cast<uint32_t>(userServiceResult));
 
   KODI::PLATFORM::PS4::RegisterVideoCodecs();
+  PS4BootLog("PS4 video codecs registered");
+  PS4BootLog("Loading Videodec2 module");
   const int32_t videodec = KODI::PLATFORM::PS4::CVideoDec2::LoadModule();
+  PS4BootLog("Videodec2 load result: 0x%08x", static_cast<uint32_t>(videodec));
   if (videodec < 0)
     CLog::Log(LOGWARNING, "PS4: Videodec2 module not loaded: {:#x}",
               static_cast<uint32_t>(videodec));
 
   KODI::WINDOWING::PS4::CWinSystemPS4::Register();
+  PS4BootLog("PS4 window system registered");
 
-  return CPlatformPosix::InitStageOne();
+  const bool result = CPlatformPosix::InitStageOne();
+  PS4BootLog("POSIX platform initialization: %s", result ? "ok" : "failed");
+  return result;
 }
 
 bool CPlatformPS4::InitStageTwo()

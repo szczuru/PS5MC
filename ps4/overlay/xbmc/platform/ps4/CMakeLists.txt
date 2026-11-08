@@ -13,6 +13,7 @@ set(SOURCES
 
 set(HEADERS
   PlatformPS4.h
+  PS4BootLog.h
   CPUInfoPS4.h
   VideoOutInfo.h
   ${CMAKE_SOURCE_DIR}/ps4/src/PS4Privileges.h
