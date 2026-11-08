@@ -17,6 +17,31 @@ CFLAGS=(
 echo "==> kompilacja probe v12..."
 clang "${CFLAGS[@]}" -c "$root/probe/main.c" -o "$out/probe.o"
 
+# The probe uses the same priority-101 constructor as Kodi. OpenOrbis v0.5.4
+# drops priority-suffixed .init_array inputs unless its linker script retains
+# and sorts them.
+python3 - "$tc/link.x" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+source = path.read_text()
+old = "\t.init_array : {\n\t\t*(.init_array);\n\t}"
+new = (
+    "\t.init_array : {\n"
+    "\t\tKEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*)))\n"
+    "\t\tKEEP (*(.init_array))\n"
+    "\t}"
+)
+if new in source:
+    print("OpenOrbis linker script already retains priority constructors")
+elif old in source:
+    path.write_text(source.replace(old, new, 1))
+    print("Patched OpenOrbis linker script for the startup probe")
+else:
+    raise SystemExit(f"Unexpected .init_array block in {path}; refusing to patch")
+PY
+
 echo "==> linkowanie..."
 ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
   -L"$tc/lib" \
@@ -25,10 +50,10 @@ ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
   -lSceSysmodule -lSceUserService -lScePad \
   -lSceAudioOut -lSceSystemService -lSceVideoOut \
   -lScePigletv2VSH \
-  "$tc/lib/crt1.o" -o "$out/ps4mc-probe.elf"
-ls -la "$out/ps4mc-probe.elf"
+  "$tc/lib/crt1.o" -o "$out/ps4-kodi-startup-probe.elf"
+ls -la "$out/ps4-kodi-startup-probe.elf"
 
 echo "==> PKG..."
-"$here/make-pkg.sh" "$out/ps4mc-probe.elf" "$out" \
-  "PS4MC Probe" PSMC00001 \
-  IV0000-PSMC00001_00-KODIPROBE0000000 01.00
+"$here/make-pkg.sh" "$out/ps4-kodi-startup-probe.elf" "$out" \
+  "Kodi startup probe" PS4PB0001 \
+  IV0000-PS4PB0001_00-KODIPROBE0000000 01.00

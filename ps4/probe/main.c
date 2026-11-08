@@ -44,6 +44,7 @@ static void ps4log(const char *fmt, ...)
     if (g_logfd >= 0) {
         write(g_logfd, b, n);
         write(g_logfd, "\n", 1);
+        fsync(g_logfd);
     }
     write(1, b, n);
     write(1, "\n", 1);
@@ -51,11 +52,15 @@ static void ps4log(const char *fmt, ...)
 
 static void open_log(void)
 {
+    if (g_logfd >= 0)
+        return;
+
     mkdir("/data/kodi", 0777);
     const char *paths[] = {
-        "/data/kodi/probe.log",
-        "/mnt/usb0/kodi-probe.log",
-        "/tmp/kodi-probe.log",
+        "/data/kodi/probe-startup.log",
+        "/mnt/usb0/kodi-startup-probe.log",
+        "/mnt/usb1/kodi-startup-probe.log",
+        "/tmp/kodi-startup-probe.log",
         NULL
     };
     for (int i = 0; paths[i]; i++) {
@@ -66,6 +71,15 @@ static void open_log(void)
         }
     }
     ps4log("LOG: failed to open any log file (errno=%d)", errno);
+}
+
+// This tiny app isolates the PS4 ELF constructor path from Kodi's much larger
+// startup. The same marker is written again by main() below if constructors
+// are skipped, which makes the resulting file distinguish the two cases.
+__attribute__((constructor(101))) static void probe_early_constructor(void)
+{
+    open_log();
+    ps4log("PROBE_EARLY_CONSTRUCTOR_REACHED");
 }
 
 static void ps4_exit(void)
@@ -442,6 +456,7 @@ static void probe_audio(void)
 int main(void)
 {
     open_log();
+    ps4log("PROBE_MAIN_REACHED");
     ps4log("PS4MC Probe v12 " __DATE__ " " __TIME__);
     ps4log("Cel: naprawić czarny ekran (dźwięk już działa)");
 

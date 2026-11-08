@@ -6,6 +6,8 @@ on:
     branches: [ps4-kodi-piers]
     paths:
       - 'ps4/**'
+      - '!ps4/probe/**'
+      - '!ps4/scripts/build-probe.sh'
       - 'xbmc/**'
       - 'tools/depends/target/python3/**'
       - 'tools/depends/target/expat/**'

@@ -1,0 +1,69 @@
+name: PS4 startup diagnostics probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ps4-kodi-piers]
+    paths:
+      - 'ps4/probe/**'
+      - 'ps4/scripts/build-probe.sh'
+      - '.github/workflows/ps4-startup-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Startup constructor and file logging probe
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ps4
+            .github
+          sparse-checkout-cone-mode: false
+
+      - name: System tools
+        run: |
+          packages=(clang lld-18 cmake ninja-build curl git python3)
+          missing=()
+          for package in "${packages[@]}"; do
+            dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
+          done
+          if ((${#missing[@]})); then
+            sudo apt-get install -y -qq "${missing[@]}"
+          fi
+          sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
+          sudo ln -sf /usr/bin/clang-18 /usr/bin/clang || true
+
+      - name: libssl1.1 for PkgTool.Core
+        run: |
+          curl -fsSL -o /tmp/libssl1.1.deb \
+            http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+          sudo dpkg -i /tmp/libssl1.1.deb
+
+      - name: Cache OpenOrbis toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/OpenOrbis
+          key: openorbis-v0.5.4-llvm18
+
+      - name: Prepare scripts
+        run: chmod +x ps4/scripts/*.sh
+
+      - name: Fetch OpenOrbis toolchain
+        run: bash ps4/scripts/00-fetch-toolchain.sh
+
+      - name: Build diagnostic PKG
+        run: bash ps4/scripts/build-probe.sh "$GITHUB_WORKSPACE/dist/startup-probe"
+
+      - name: Verify package
+        run: test "$(stat -c%s dist/startup-probe/*.pkg | head -1)" -gt 1000000
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps4-kodi-startup-probe
+          path: dist/startup-probe/*.pkg
+          if-no-files-found: error
