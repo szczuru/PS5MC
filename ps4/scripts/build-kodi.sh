@@ -201,7 +201,17 @@ if ! "$nm_tool" -a -C "$build/kodi.elf" | grep -E '[[:space:]]PS4EarlyBootLog\(\
   echo "ERROR: PS4EarlyBootLog is missing from $build/kodi.elf" >&2
   exit 1
 fi
-echo "Verified main and PS4EarlyBootLog are present in kodi.elf"
+readelf_tool="$(command -v llvm-readelf || command -v readelf || true)"
+if [ -z "$readelf_tool" ]; then
+  echo "ERROR: llvm-readelf/readelf is required to validate Kodi constructors" >&2
+  exit 1
+fi
+if ! "$readelf_tool" -W -d "$build/kodi.elf" | grep -E '\(INIT_ARRAY\)' >/dev/null || \
+   ! "$readelf_tool" -W -d "$build/kodi.elf" | grep -E '\(INIT_ARRAYSZ\)[[:space:]]+0x([1-9a-fA-F][0-9a-fA-F]*)' >/dev/null; then
+  echo "ERROR: kodi.elf has no non-empty constructor array" >&2
+  exit 1
+fi
+echo "Verified main, PS4EarlyBootLog, and a non-empty ELF constructor array"
 
 rm -rf "$stage"
 DESTDIR="$stage" cmake --install "$build"
