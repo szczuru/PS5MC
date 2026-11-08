@@ -69,7 +69,9 @@ bool CWinSystemPS4::CreateContext()
 {
   PS4BootLog("Creating Piglet EGL display");
   const bool displayCreated = m_eglContext.CreateDisplay(EGL_DEFAULT_DISPLAY);
-  PS4BootLog("EGL display creation: %s", displayCreated ? "ok" : "failed");
+  const EGLint displayError = displayCreated ? EGL_SUCCESS : eglGetError();
+  PS4BootLog("EGL display creation: %s (eglError=0x%04x)",
+             displayCreated ? "ok" : "failed", static_cast<unsigned int>(displayError));
   const bool displayInitialized =
       displayCreated && m_eglContext.InitializeDisplay(EGL_OPENGL_ES_API);
   PS4BootLog("EGL display initialization: %s", displayInitialized ? "ok" : "failed");
@@ -114,9 +116,11 @@ bool CWinSystemPS4::InitWindowSystem()
   config.flags = ORBIS_PGL_FLAGS_USE_COMPOSITE_EXT |
                  ORBIS_PGL_FLAGS_USE_FLEXIBLE_MEMORY | 0x60;
   config.processOrder = 1;
-  config.systemSharedMemorySize = 128ull * 1024 * 1024;
-  config.videoSharedMemorySize = 256ull * 1024 * 1024;
-  config.maxMappedFlexibleMemory = 64ull * 1024 * 1024;
+  // Match the OpenOrbis Piglet sample's working allocation sizes. Kodi's GUI
+  // and video surfaces need substantially more room than the small probe.
+  config.systemSharedMemorySize = 250ull * 1024 * 1024;
+  config.videoSharedMemorySize = 512ull * 1024 * 1024;
+  config.maxMappedFlexibleMemory = 170ull * 1024 * 1024;
   config.drawCommandBufferSize = 1ull * 1024 * 1024;
   config.lcueResourceBufferSize = 1ull * 1024 * 1024;
   config.dbgPosCmd_0x40 = 1920;
@@ -127,7 +131,7 @@ bool CWinSystemPS4::InitWindowSystem()
   PS4BootLog("Configuring Piglet VideoOut");
   const int32_t pigletResult = scePigletSetConfigurationVSH(&config);
   PS4BootLog("scePigletSetConfigurationVSH: 0x%08x", static_cast<uint32_t>(pigletResult));
-  if (pigletResult < 0)
+  if (pigletResult <= 0)
   {
     CLog::Log(LOGERROR, "PS4: scePigletSetConfigurationVSH failed: {:#x}",
               static_cast<uint32_t>(pigletResult));
