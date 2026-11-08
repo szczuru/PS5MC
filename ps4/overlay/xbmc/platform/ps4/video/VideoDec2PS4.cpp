@@ -254,18 +254,37 @@ int32_t CVideoDec2::LoadModule()
 
   // Videodec2 is not a normal PS4 import library. Load the system modules and
   // resolve its exports dynamically so Kodi can start even if they are absent.
-  for (const char* dependency : {"/system/common/lib/libSceVdecCore.sprx",
-                                 "/system/common/lib/libSceVdecSavc.sprx",
-                                 "/system/common/lib/libSceVdecSavc2.sprx",
-                                 "/system/common/lib/libSceVdecwrap.sprx"})
+  // System SPRXs must be addressed through this title's sandbox namespace, as
+  // they are in the known-working Piglet loader; /system/common/lib is not
+  // necessarily visible from a homebrew title.
+  const char* sandbox = sceKernelGetFsSandboxRandomWord();
+  if (!sandbox || !*sandbox)
   {
-    const int32_t result = LoadSystemModule(dependency);
+    Log("[ps4-vdec] no filesystem sandbox name; cannot load Videodec2\n");
+    return -1;
+  }
+  const std::string sandboxLibraryPath = std::string("/") + sandbox + "/common/lib/";
+  const auto loadSystemLibrary = [&sandboxLibraryPath](const char* name) {
+    const std::string sandboxPath = sandboxLibraryPath + name;
+    int32_t module = LoadSystemModule(sandboxPath.c_str());
+    if (module < 0)
+    {
+      const std::string systemPath = std::string("/system/common/lib/") + name;
+      module = LoadSystemModule(systemPath.c_str());
+    }
+    return module;
+  };
+
+  for (const char* dependency : {"libSceVdecCore.sprx", "libSceVdecSavc.sprx",
+                                 "libSceVdecSavc2.sprx", "libSceVdecwrap.sprx"})
+  {
+    const int32_t result = loadSystemLibrary(dependency);
     if (result < 0)
       Log("[ps4-vdec] optional dependency unavailable: %s\n", dependency);
   }
   sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_VDECCORE);
 
-  g_module = LoadSystemModule("/system/common/lib/libSceVideodec2.sprx");
+  g_module = loadSystemLibrary("libSceVideodec2.sprx");
   if (g_module < 0)
     g_module = LoadSystemModule("libSceVideodec2.sprx");
   if (g_module < 0 || !ResolveVideodec2Api(g_module))
