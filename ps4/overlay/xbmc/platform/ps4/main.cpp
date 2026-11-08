@@ -101,6 +101,15 @@ void PS4BootLog(const char* fmt, ...)
   }
 }
 
+// Run before ordinary C++ global constructors and main(). If no log appears,
+// the failure is in ELF loading/startup or the app cannot write any fallback.
+__attribute__((constructor(101))) static void PS4EarlyBootLog()
+{
+  OpenBootLog();
+  PS4BootLog("PS4 early constructor reached; log: %s",
+             g_logpath ? g_logpath : "unavailable");
+}
+
 extern "C" int main(int /*argc*/, char* /*argv*/[])
 {
   setenv("PYTHONHOME", "/app0", 0);
