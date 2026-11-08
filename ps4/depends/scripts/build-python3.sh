@@ -98,7 +98,7 @@ mkdir -p "$target_build"
   # OpenOrbis exposes the PS4 ABI's 16-bit wchar_t; make clang's wide
   # literals and CPython's wchar_t agree for Python paths/configuration.
   env "${cache[@]}" \
-    CFLAGS="$CFLAGS -fshort-wchar" \
+    CFLAGS="$CFLAGS -fshort-wchar -Werror=incompatible-pointer-types -Werror=pointer-type-mismatch" \
     CPPFLAGS="-I$PS4_PREFIX/include" \
     LDFLAGS="$LDFLAGS -nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x -Wl,--eh-frame-hdr -L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib" \
     LIBS="-lc -lkernel -lSceSysmodule -lm $OO_PS4_TOOLCHAIN/lib/crt1.o" \
@@ -110,6 +110,10 @@ mkdir -p "$target_build"
     MODULE_BUILDTYPE=static "${modules[@]}"
 
   test -f pyconfig.h || { echo "CPython configure did not produce pyconfig.h" >&2; exit 1; }
+  grep -q '^#define SIZEOF_WCHAR_T 2$' pyconfig.h || {
+    echo "CPython target config does not match the PS4 16-bit wchar_t ABI" >&2
+    exit 1
+  }
   grep -q '^#define HAVE_GETENTROPY 1' pyconfig.h || {
     echo "CPython target config lacks getentropy; Python startup would be unreliable" >&2
     exit 1
