@@ -90,6 +90,32 @@ dump_ffmpeg_config_log_on_failure() {
 trap dump_ffmpeg_config_log_on_failure EXIT
 
 "$root/ps4/scripts/00-fetch-toolchain.sh"
+# OpenOrbis v0.5.4's linker script only collects the unsuffixed .init_array
+# input section. Clang emits priority constructors (including our pre-main
+# logger) into .init_array.<priority>; without these entries the linker drops
+# them even though their function symbols remain in the ELF. Patch the cached
+# SDK script idempotently so priority constructors are sorted and retained.
+python3 - "$OO_PS4_TOOLCHAIN/link.x" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+source = path.read_text()
+old = "\t.init_array : {\n\t\t*(.init_array);\n\t}"
+new = (
+    "\t.init_array : {\n"
+    "\t\tKEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*)))\n"
+    "\t\tKEEP (*(.init_array))\n"
+    "\t}"
+)
+if new in source:
+    print("OpenOrbis linker script already retains priority constructors")
+elif old in source:
+    path.write_text(source.replace(old, new, 1))
+    print("Patched OpenOrbis linker script to retain priority constructors")
+else:
+    raise SystemExit(f"Unexpected .init_array block in {path}; refusing to patch")
+PY
 "$root/ps4/scripts/build-depends.sh"
 "$root/ps4/depends/scripts/build-harfbuzz.sh"
 "$root/ps4/depends/scripts/build-fribidi.sh"
