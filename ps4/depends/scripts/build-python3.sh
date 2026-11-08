@@ -95,7 +95,10 @@ cache=(
 mkdir -p "$target_build"
 (
   cd "$target_build"
+  # OpenOrbis exposes the PS4 ABI's 16-bit wchar_t; make clang's wide
+  # literals and CPython's wchar_t agree for Python paths/configuration.
   env "${cache[@]}" \
+    CFLAGS="$CFLAGS -fshort-wchar" \
     CPPFLAGS="-I$PS4_PREFIX/include" \
     LDFLAGS="$LDFLAGS -nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,$OO_PS4_TOOLCHAIN/link.x -Wl,--eh-frame-hdr -L$OO_PS4_TOOLCHAIN/lib -L$PS4_PREFIX/lib" \
     LIBS="-lc -lkernel -lSceSysmodule -lm $OO_PS4_TOOLCHAIN/lib/crt1.o" \
