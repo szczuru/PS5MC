@@ -9,6 +9,7 @@ set(SOURCES
   VideoOutInfo.cpp
   ${CMAKE_SOURCE_DIR}/ps4/src/PS4Privileges.cpp
   ${CMAKE_SOURCE_DIR}/ps4/src/PS4ThreadAtexit.c
+  PS4BootLog.c
 )
 
 set(HEADERS
