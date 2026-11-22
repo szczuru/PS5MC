@@ -58,6 +58,24 @@ echo "==> PKG..."
   "Kodi startup probe" PSMC00009 \
   IV0000-PSMC00009_00-KODIPROBE0000000 01.00
 
+echo "==> kompilacja sondy importu libSceNet..."
+clang "${CFLAGS[@]}" -c "$root/probe/net_dependency.c" -o "$out/net-dependency.o"
+ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
+  -L"$tc/lib" \
+  "$out/net-dependency.o" \
+  -lc -lkernel -lm \
+  --no-as-needed -lSceNet --as-needed \
+  "$tc/lib/crt1.o" -o "$out/ps4-kodi-net-dependency-probe.elf"
+readelf_tool="$(command -v llvm-readelf || command -v llvm-readelf-18 || command -v readelf || true)"
+if [ -z "$readelf_tool" ] || ! "$readelf_tool" -W -d "$out/ps4-kodi-net-dependency-probe.elf" | \
+  grep -F 'Shared library: [libSceNet.so]' >/dev/null; then
+  echo "ERROR: net dependency probe does not require libSceNet.so" >&2
+  exit 1
+fi
+"$here/make-pkg.sh" "$out/ps4-kodi-net-dependency-probe.elf" "$out" \
+  "Kodi Net dependency probe" PSMC00010 \
+  IV0000-PSMC00010_00-KODIPROBE0000000 01.00
+
 echo "==> kompilacja minimalnego C++/TLS startup probe..."
 clang++ --target=x86_64-pc-freebsd12-elf -std=c++17 -fPIC -funwind-tables \
   -ftls-model=global-dynamic \

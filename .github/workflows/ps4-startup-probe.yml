@@ -65,7 +65,7 @@ jobs:
         run: |
           shopt -s nullglob
           packages=(dist/startup-probe/*.pkg)
-          test "${#packages[@]}" -eq 4
+          test "${#packages[@]}" -eq 5
           for package in "${packages[@]}"; do
             test "$(stat -c%s "$package")" -gt 1000000
           done
