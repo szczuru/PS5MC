@@ -329,9 +329,14 @@ static void probe_piglet(void)
 
     EGLint major = 0, minor = 0;
     if (!eglInitialize(dpy, &major, &minor)) {
-        ps4log("  eglInitialize FAIL");
+        EGLint error = eglGetError();
+        ps4log("  eglInitialize FAIL eglError=0x%x", error);
         return;
     }
+    EGLBoolean swap_interval_ok = eglSwapInterval(dpy, 0);
+    EGLint swap_interval_error = eglGetError();
+    ps4log("  eglSwapInterval(0) before surface: %s eglError=0x%x",
+           swap_interval_ok == EGL_TRUE ? "OK" : "FAIL", swap_interval_error);
     ps4log("  EGL %d.%d  GL_VENDOR=%s", major, minor,
            glGetString(GL_VENDOR) ? (const char *)glGetString(GL_VENDOR) : "?");
     ps4log("  GL_RENDERER=%s",

@@ -75,6 +75,14 @@ bool CWinSystemPS4::CreateContext()
   const bool displayInitialized =
       displayCreated && m_eglContext.InitializeDisplay(EGL_OPENGL_ES_API);
   PS4BootLog("EGL display initialization: %s", displayInitialized ? "ok" : "failed");
+  // Piglet on PS4 can deadlock on the first eglSwapBuffers when interval 1 is
+  // selected after making the context current. Set interval 0 before creating
+  // the surface; Kodi's frame limiter remains responsible for pacing.
+  const EGLBoolean swapIntervalSet =
+      displayInitialized ? eglSwapInterval(m_eglContext.GetEGLDisplay(), 0) : EGL_FALSE;
+  PS4BootLog("Initial EGL swap interval 0: %s (eglError=0x%04x)",
+             swapIntervalSet == EGL_TRUE ? "ok" : "failed",
+             static_cast<unsigned int>(swapIntervalSet == EGL_TRUE ? EGL_SUCCESS : eglGetError()));
   const bool configChosen = displayInitialized && m_eglContext.ChooseConfig(EGL_OPENGL_ES2_BIT);
   PS4BootLog("EGL config selection: %s", configChosen ? "ok" : "failed");
   if (!configChosen)
@@ -239,7 +247,10 @@ void CWinSystemPS4::UpdateResolutions()
 
 void CWinSystemPS4::SetVSyncImpl(bool enable)
 {
-  m_eglContext.SetVSync(enable);
+  // Keep Piglet at interval 0. Enabling interval 1 after eglMakeCurrent can
+  // hang the first swap on PS4; Kodi still throttles frames through its clock.
+  (void)enable;
+  m_eglContext.SetVSync(false);
 }
 
 void CWinSystemPS4::PresentRenderImpl(bool rendered)
