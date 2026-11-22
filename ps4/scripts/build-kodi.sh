@@ -263,10 +263,6 @@ if ! "$nm_tool" -a -C "$build/kodi.elf" | grep -E '[[:space:]]PS4EarlyBootLog(\(
   echo "ERROR: PS4EarlyBootLog is missing from $build/kodi.elf" >&2
   exit 1
 fi
-if ! "$nm_tool" -a "$build/kodi.elf" | grep -E '[[:space:]]T[[:space:]]+_init$' >/dev/null; then
-  echo "ERROR: strong PS4 _init startup hook is missing from $build/kodi.elf" >&2
-  exit 1
-fi
 if ! "$nm_tool" -a "$build/kodi.elf" | grep -F '__emutls_get_address' >/dev/null; then
   echo "ERROR: kodi.elf does not contain the emulated TLS runtime; check -femulated-tls and compiler-rt linkage" >&2
   exit 1
@@ -281,7 +277,7 @@ if ! "$readelf_tool" -W -d "$build/kodi.elf" | grep -E '\(INIT_ARRAY\)' >/dev/nu
   echo "ERROR: kodi.elf has no non-empty constructor array" >&2
   exit 1
 fi
-echo "Verified main, _init startup hook, early boot logger, emulated TLS runtime, and constructor array"
+echo "Verified main, early boot logger, emulated TLS runtime, and constructor array"
 
 rm -rf "$stage"
 DESTDIR="$stage" cmake --install "$build"

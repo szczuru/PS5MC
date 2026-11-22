@@ -99,20 +99,10 @@ void PS4BootLogPromoteToData(void)
   PS4BootLog("Startup log moved to /data/kodi/startup.log");
 }
 
-// OpenOrbis musl calls the executable's _init hook before walking its
-// .init_array. This gives us a persistent marker even if a later C++ static
-// initializer crashes before main().
-void _init(void);
-void _init(void)
-{
-  OpenBootLog();
-  PS4BootLog("PS4 executable _init reached; log: %s",
-             g_logpath ? g_logpath : "unavailable");
-}
-
 // Kodi's ELF currently has another constructor at priority 100. Put this C
-// logger before it so a fault in any C++ global initializer still leaves a
-// persistent marker on the console.
+// logger first in .init_array so a fault in any later global initializer still
+// leaves a marker. Keep the CRT's DT_INIT hook intact; replacing _init here
+// would bypass any startup work supplied by the PS4 runtime.
 __attribute__((constructor(1))) static void PS4EarlyBootLog(void)
 {
   OpenBootLog();
