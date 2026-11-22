@@ -304,9 +304,11 @@ static void probe_piglet(void)
     cfg.processOrder = 1;
     cfg.flags = ORBIS_PGL_FLAGS_USE_COMPOSITE_EXT |
                 ORBIS_PGL_FLAGS_USE_FLEXIBLE_MEMORY | 0x60;
-    cfg.systemSharedMemorySize  = 128ull * 1024 * 1024;
-    cfg.videoSharedMemorySize   = 256ull * 1024 * 1024;
-    cfg.maxMappedFlexibleMemory =  64ull * 1024 * 1024;
+    /* Keep this identical to Kodi's WinSystemPS4 configuration. Otherwise a
+     * failed EGL probe would not tell us whether the production budget works. */
+    cfg.systemSharedMemorySize  = 250ull * 1024 * 1024;
+    cfg.videoSharedMemorySize   = 512ull * 1024 * 1024;
+    cfg.maxMappedFlexibleMemory = 170ull * 1024 * 1024;
     cfg.drawCommandBufferSize   =   1ull * 1024 * 1024;
     cfg.lcueResourceBufferSize  =   1ull * 1024 * 1024;
     cfg.dbgPosCmd_0x40 = 1920;
@@ -318,9 +320,10 @@ static void probe_piglet(void)
     if (cfg_result < 0)
         return;
 
-    EGLDisplay dpy = eglGetDisplay(0);
-    ps4log("  eglGetDisplay(0): %s",
-           (dpy != EGL_NO_DISPLAY) ? "OK" : "FAIL");
+    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLint display_error = eglGetError();
+    ps4log("  eglGetDisplay(EGL_DEFAULT_DISPLAY): %s eglError=0x%x",
+           (dpy != EGL_NO_DISPLAY) ? "OK" : "FAIL", display_error);
     if (dpy == EGL_NO_DISPLAY)
         return;
 
