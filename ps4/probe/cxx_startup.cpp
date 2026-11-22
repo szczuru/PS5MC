@@ -33,6 +33,9 @@ __attribute__((constructor(200))) static void CxxInitializer()
 extern "C" int main(int, char**)
 {
   Log("CXX_PROBE_MAIN_REACHED");
+#ifdef PS4_PROBE_ORBIS_KEY_EMUTLS
+  Log("CXX_PROBE_EMUTLS_RUNTIME=libkernel-scePthreadKey");
+#endif
   const int value = g_threadValue;
   if (value == 0x4b4f4449)
     Log("CXX_PROBE_TLS_READ_OK");

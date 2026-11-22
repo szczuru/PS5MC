@@ -107,3 +107,26 @@ fi
 "$here/make-pkg.sh" "$out/ps4-kodi-cxx-emulated-tls-probe.elf" "$out" \
   "Kodi emulated TLS probe" PSMC00007 \
   IV0000-PSMC00007_00-KODIPROBE0000000 01.00
+
+echo "==> kompilacja emulated TLS z kluczami Orbis libkernel..."
+clang++ --target=x86_64-pc-freebsd12-elf -std=c++17 -fPIC -funwind-tables \
+  -femulated-tls -DPS4_PROBE_ORBIS_KEY_EMUTLS \
+  -fno-exceptions -fno-rtti -nostdinc++ \
+  -isysroot "$tc" -isystem "$tc/include" \
+  -c "$root/probe/cxx_startup.cpp" -o "$out/cxx-orbis-emulated-tls.o"
+clang --target=x86_64-pc-freebsd12-elf -std=c11 -fPIC -funwind-tables \
+  -isysroot "$tc" -isystem "$tc/include" \
+  -c "$root/probe/emutls_orbis.c" -o "$out/emutls-orbis.o"
+ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
+  -L"$tc/lib" \
+  "$out/cxx-orbis-emulated-tls.o" "$out/emutls-orbis.o" \
+  -lc -lkernel -lm \
+  "$tc/lib/crt1.o" -o "$out/ps4-kodi-cxx-orbis-emulated-tls-probe.elf"
+if ! "$nm_tool" -a "$out/ps4-kodi-cxx-orbis-emulated-tls-probe.elf" | \
+    grep -F '__emutls_get_address' >/dev/null; then
+  echo "ERROR: Orbis-key emulated TLS probe lacks __emutls_get_address" >&2
+  exit 1
+fi
+"$here/make-pkg.sh" "$out/ps4-kodi-cxx-orbis-emulated-tls-probe.elf" "$out" \
+  "Kodi Orbis-key TLS probe" PSMC00006 \
+  IV0000-PSMC00006_00-KODIPROBE0000000 01.00
