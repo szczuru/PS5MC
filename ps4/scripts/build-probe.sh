@@ -69,7 +69,12 @@ ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
   "$out/cxx-startup.o" \
   -lc -lkernel -lm \
   "$tc/lib/crt1.o" -o "$out/ps4-kodi-cxx-startup-probe.elf"
-if ! llvm-nm -a "$out/ps4-kodi-cxx-startup-probe.elf" | grep -F '__tls_get_addr' >/dev/null; then
+nm_tool="$(command -v llvm-nm || command -v llvm-nm-18 || command -v nm || true)"
+if [ -z "$nm_tool" ]; then
+  echo "ERROR: nm is required to validate the dynamic TLS probe" >&2
+  exit 1
+fi
+if ! "$nm_tool" -a "$out/ps4-kodi-cxx-startup-probe.elf" | grep -F '__tls_get_addr' >/dev/null; then
   echo "ERROR: global-dynamic TLS probe does not reference __tls_get_addr" >&2
   exit 1
 fi
