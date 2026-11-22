@@ -140,9 +140,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ps4/depends/prefix
-          key: ps4-depends-${{ hashFiles('ps4/depends/scripts/*.sh') }}
+          key: ps4-emutls-depends-${{ hashFiles('ps4/depends/scripts/*.sh') }}
           restore-keys: |
-            ps4-depends-
+            ps4-emutls-depends-
 
       - name: Uprawnienia skryptów
         run: |
@@ -178,7 +178,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Narzędzia
         run: |
-          packages=(clang lld-18 llvm libc++-18-dev cmake ninja-build ccache curl git python3 libssl-dev pkg-config nasm autoconf automake libtool libtool-bin meson gperf liblzo2-dev libpng-dev libgif-dev libjpeg-dev)
+          packages=(clang lld-18 llvm libclang-rt-18-dev libc++-18-dev cmake ninja-build ccache curl git python3 libssl-dev pkg-config nasm autoconf automake libtool libtool-bin meson gperf liblzo2-dev libpng-dev libgif-dev libjpeg-dev)
           missing=()
           for package in "${packages[@]}"; do
             dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
@@ -217,9 +217,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ps4/depends/prefix
-          key: ps4-depends-${{ hashFiles('ps4/depends/scripts/*.sh') }}
+          key: ps4-emutls-depends-${{ hashFiles('ps4/depends/scripts/*.sh') }}
           restore-keys: |
-            ps4-depends-
+            ps4-emutls-depends-
       - name: Pobierz zależności z joba M3
         uses: actions/download-artifact@v4
         with:

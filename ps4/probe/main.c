@@ -119,7 +119,10 @@ static int try_videoout(int width, int height, int pixel_format, int tiling,
            tag, width, height, pixel_format, tiling);
 
     int32_t user = 0;
-    sceUserServiceGetInitialUser(&user);
+    ps4log("  before sceUserServiceGetInitialUser");
+    int user_result = sceUserServiceGetInitialUser(&user);
+    ps4log("  after sceUserServiceGetInitialUser: result=0x%x user=%d",
+           user_result, user);
 
     /* busType 0 = MAIN */
     int vo = sceVideoOutOpen(user, 0 /* ORBIS_VIDEO_OUT_BUS_MAIN */, 0, NULL);
@@ -449,7 +452,9 @@ int main(void)
     ps4log("PS4MC Probe v12 " __DATE__ " " __TIME__);
     ps4log("Cel: naprawić czarny ekran (dźwięk już działa)");
 
-    sceUserServiceInitialize(NULL);
+    ps4log("before sceUserServiceInitialize");
+    int user_service_result = sceUserServiceInitialize(NULL);
+    ps4log("after sceUserServiceInitialize: 0x%x", user_service_result);
 
     /* VideoOut NAJPIERW – Piglet może zablokować display */
     probe_videoout();

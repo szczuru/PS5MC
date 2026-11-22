@@ -44,9 +44,18 @@ execute_process(
 set(PS4_PREFIX "${OO_PS4_TOOLCHAIN}/ps4mc-prefix" CACHE PATH "install prefix of cross-built libs")
 
 set(_ps4_common "-nostdinc -fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${CMAKE_CURRENT_LIST_DIR}/compat/include -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_CLANG_RESOURCE_DIR}/include -isystem ${PS4_PREFIX}/include")
-# OpenOrbis' PS4 CRT does not initialize the executable's local-exec TLS
-# block. Route all TLS accesses through musl's __tls_get_addr instead.
-set(_ps4_tls_flags "-ftls-model=global-dynamic")
+# OpenOrbis' PS4 startup does not initialize native executable TLS. On
+# hardware, even global-dynamic returned zero, so use compiler-rt emutls.
+set(_ps4_tls_flags "-femulated-tls")
+execute_process(
+  COMMAND "${PS4_CLANG}" --target=x86_64-linux-gnu -rtlib=compiler-rt
+          -print-libgcc-file-name
+  OUTPUT_VARIABLE PS4_COMPILER_RT_BUILTINS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY)
+if(NOT EXISTS "${PS4_COMPILER_RT_BUILTINS}")
+  message(FATAL_ERROR "Clang compiler-rt builtins archive not found: ${PS4_COMPILER_RT_BUILTINS}")
+endif()
 set(CMAKE_C_FLAGS_INIT   "${_ps4_common} ${_ps4_tls_flags}")
 # Kodi uses C++20 ranges. build-kodi.sh stages LLVM 18's libc++ headers under
 # PS4_PREFIX and applies the two compatibility shims needed by OpenOrbis libc.
@@ -64,8 +73,8 @@ endif()
 set(CMAKE_EXE_LINKER_FLAGS_INIT
     "-nostdlib -fuse-ld=lld -pie -Wl,-m,elf_x86_64 -Wl,--script,${OO_PS4_TOOLCHAIN}/link.x -Wl,--eh-frame-hdr -L${PS4_PREFIX}/lib -L${OO_PS4_TOOLCHAIN}/lib")
 set(_ps4_system_libraries "-lSceVideoOut -lSceAudioOut -lScePad -lSceUserService -lSceSystemService -lSceSysmodule -lScePigletv2VSH -lkernel -lc -lm")
-set(CMAKE_C_STANDARD_LIBRARIES   "${_ps4_system_libraries} ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
-set(CMAKE_CXX_STANDARD_LIBRARIES "-lc++ -lc++abi -lunwind ${_ps4_system_libraries} ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
+set(CMAKE_C_STANDARD_LIBRARIES   "${PS4_COMPILER_RT_BUILTINS} ${_ps4_system_libraries} ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
+set(CMAKE_CXX_STANDARD_LIBRARIES "-lc++ -lc++abi -lunwind ${PS4_COMPILER_RT_BUILTINS} ${_ps4_system_libraries} ${OO_PS4_TOOLCHAIN}/lib/crt1.o")
 
 # No shared libraries: a title cannot dlopen anything we ship.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
