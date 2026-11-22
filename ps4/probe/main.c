@@ -124,6 +124,10 @@ static int try_videoout(int width, int height, int pixel_format, int tiling,
     ps4log("  after sceUserServiceGetInitialUser: result=0x%x user=%d",
            user_result, user);
 
+    /* The previous hardware log ended at GetInitialUser. Mark the next call
+     * explicitly so a crash inside VideoOutOpen is distinguishable from a
+     * logging or process-exit issue. */
+    ps4log("  before sceVideoOutOpen");
     /* busType 0 = MAIN */
     int vo = sceVideoOutOpen(user, 0 /* ORBIS_VIDEO_OUT_BUS_MAIN */, 0, NULL);
     ps4log("  sceVideoOutOpen: %d (0x%x)", vo, vo);

@@ -110,7 +110,10 @@ void _init(void)
              g_logpath ? g_logpath : "unavailable");
 }
 
-__attribute__((constructor(101))) static void PS4EarlyBootLog(void)
+// Kodi's ELF currently has another constructor at priority 100. Put this C
+// logger before it so a fault in any C++ global initializer still leaves a
+// persistent marker on the console.
+__attribute__((constructor(1))) static void PS4EarlyBootLog(void)
 {
   OpenBootLog();
   PS4BootLog("PS4 C early constructor reached; log: %s",
