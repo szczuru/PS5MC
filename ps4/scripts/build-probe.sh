@@ -27,17 +27,30 @@ import sys
 path = Path(sys.argv[1])
 source = path.read_text()
 old = "\t.init_array : {\n\t\t*(.init_array);\n\t}"
+previous = (
+    "\t.init_array : {\n"
+    "\t\tKEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*)))\n"
+    "\t\tKEEP (*(.init_array))\n"
+    "\t}"
+)
 new = (
+    "\t.preinit_array : {\n"
+    "\t\tKEEP (*(SORT_BY_INIT_PRIORITY(.preinit_array.*)))\n"
+    "\t\tKEEP (*(.preinit_array))\n"
+    "\t}\n"
     "\t.init_array : {\n"
     "\t\tKEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*)))\n"
     "\t\tKEEP (*(.init_array))\n"
     "\t}"
 )
 if new in source:
-    print("OpenOrbis linker script already retains priority constructors")
+    print("OpenOrbis linker script already retains preinit and priority constructors")
+elif previous in source:
+    path.write_text(source.replace(previous, new, 1))
+    print("Upgraded OpenOrbis linker script for preinit and startup constructors")
 elif old in source:
     path.write_text(source.replace(old, new, 1))
-    print("Patched OpenOrbis linker script for the startup probe")
+    print("Patched OpenOrbis linker script for preinit and startup constructors")
 else:
     raise SystemExit(f"Unexpected .init_array block in {path}; refusing to patch")
 PY
@@ -57,6 +70,25 @@ echo "==> PKG..."
 "$here/make-pkg.sh" "$out/ps4-kodi-startup-probe.elf" "$out" \
   "Kodi startup probe" PSMC00009 \
   IV0000-PSMC00009_00-KODIPROBE0000000 01.00
+
+echo "==> build preinit-array startup probe..."
+readelf_tool="$(command -v llvm-readelf || command -v llvm-readelf-18 || command -v readelf || true)"
+clang "${CFLAGS[@]}" -c "$root/probe/preinit_startup.c" -o "$out/preinit-startup.o"
+ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
+  -L"$tc/lib" \
+  "$out/preinit-startup.o" \
+  -lc -lkernel -lm \
+  "$tc/lib/crt1.o" -o "$out/ps4-kodi-preinit-startup-probe.elf"
+if [ -z "$readelf_tool" ] || \
+   ! "$readelf_tool" -W -d "$out/ps4-kodi-preinit-startup-probe.elf" | grep -E '\(PREINIT_ARRAY\)' >/dev/null || \
+   ! "$readelf_tool" -W -d "$out/ps4-kodi-preinit-startup-probe.elf" | grep -E '\(PREINIT_ARRAYSZ\)[[:space:]]+(0x[1-9a-fA-F][0-9a-fA-F]*|[1-9][0-9]*)' >/dev/null; then
+  echo "ERROR: PS4 preinit probe does not contain non-empty DT_PREINIT_ARRAY tags" >&2
+  "$readelf_tool" -W -d "$out/ps4-kodi-preinit-startup-probe.elf" || true
+  exit 1
+fi
+"$here/make-pkg.sh" "$out/ps4-kodi-preinit-startup-probe.elf" "$out" \
+  "Kodi preinit startup probe" PSMC00012 \
+  IV0000-PSMC00012_00-KODIPROBE0000000 01.00
 
 echo "==> kompilacja sondy importu libSceNet..."
 clang "${CFLAGS[@]}" -c "$root/probe/net_dependency.c" -o "$out/net-dependency.o"
