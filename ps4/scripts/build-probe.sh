@@ -57,3 +57,17 @@ echo "==> PKG..."
 "$here/make-pkg.sh" "$out/ps4-kodi-startup-probe.elf" "$out" \
   "Kodi startup probe" PSMC00009 \
   IV0000-PSMC00009_00-KODIPROBE0000000 01.00
+
+echo "==> kompilacja minimalnego C++/TLS startup probe..."
+clang++ --target=x86_64-pc-freebsd12-elf -std=c++17 -fPIC -funwind-tables \
+  -fno-exceptions -fno-rtti -nostdinc++ \
+  -isysroot "$tc" -isystem "$tc/include" \
+  -c "$root/probe/cxx_startup.cpp" -o "$out/cxx-startup.o"
+ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
+  -L"$tc/lib" \
+  "$out/cxx-startup.o" \
+  -lc -lkernel -lm \
+  "$tc/lib/crt1.o" -o "$out/ps4-kodi-cxx-startup-probe.elf"
+"$here/make-pkg.sh" "$out/ps4-kodi-cxx-startup-probe.elf" "$out" \
+  "Kodi C++ startup probe" PSMC00009 \
+  IV0000-PSMC00009_00-KODIPROBE0000000 01.00
