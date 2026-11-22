@@ -32,9 +32,24 @@ struct sceVideodec2DecoderConfig
   uint32_t resourceType, codecType, profile, maxLevel;
   int32_t maxWidth, maxHeight, maxDpbFrames;
   uint32_t pipelineDepth;
-  uint64_t computeQueue, cpuAffinity;
+  void* computeQueue;
+  uint64_t cpuAffinity;
   int32_t cpuPriority;
-  uint32_t optimizeProgressive, checkMemoryType, reserved;
+  bool optimizeProgressive, checkMemoryType;
+  uint8_t reserved0, reserved1;
+  void* extraConfigInfo;
+};
+
+struct sceVideodec2HevcExtraConfig
+{
+  uint64_t size;
+  int32_t tierType;
+  int8_t maxBitDepthLuma;
+  int8_t maxBitDepthChroma;
+  uint16_t reserved;
+  int32_t maxTemporalIdToDecode;
+  uint32_t hdrFrameFormat;
+  uint32_t gpuLoadLevel;
 };
 
 struct sceVideodec2DecoderMemory
@@ -90,6 +105,9 @@ struct sceVideodec2Output
 
 }
 
+static_assert(sizeof(sceVideodec2DecoderConfig) == 72);
+static_assert(offsetof(sceVideodec2DecoderConfig, extraConfigInfo) == 64);
+
 namespace
 {
 using QueryComputeMemoryInfoFn = int32_t (*)(sceVideodec2ComputeMemory*);
@@ -123,6 +141,9 @@ Videodec2Api g_api;
 int32_t g_module{-1};
 constexpr uint32_t kCodecH264 = 1;
 constexpr uint32_t kCodecHEVC = 0x000ee049;
+constexpr int32_t kHevcTierHigh = 1;
+constexpr uint32_t kHevcFrameFormatDefault = 0;
+constexpr uint32_t kHevcGpuLoadLevel3 = 3;
 // VP9: the value the prosper project maps to VP9 (console-proven VP9 decode:
 // BlackBearReloaded's PS4-hardware-video-decoding-research, EVO Player)
 constexpr uint32_t kCodecVP9 = 2382845;
@@ -372,10 +393,27 @@ bool CVideoDec2::Open(VideoDec2Codec codec, int width, int height, std::string& 
   // parameter sets it is given - and 10-bit decoders refuse them outright
   // (0x811d0111). Real time at 4K60 is therefore the decoder's own job.
   config.pipelineDepth = 1;
-  config.computeQueue = reinterpret_cast<uint64_t>(m_computeQueue);
+  config.computeQueue = m_computeQueue;
   config.cpuAffinity = 0x3f;
   config.cpuPriority = 700;
   config.optimizeProgressive = interlaced ? 0 : 1; // interlaced: probe (kodi-hw-interlaced)
+  config.checkMemoryType = h264 || vp9;
+
+  // HEVC requires the extra configuration block to describe tier and bit
+  // depth. The decoder reads it synchronously in both memory query and create.
+  // Keep it alive until CreateDecoder has returned.
+  sceVideodec2HevcExtraConfig hevcExtra{};
+  if (!h264 && !vp9)
+  {
+    hevcExtra.size = sizeof(hevcExtra);
+    hevcExtra.tierType = kHevcTierHigh;
+    hevcExtra.maxBitDepthLuma = m_tenBit ? 10 : 8;
+    hevcExtra.maxBitDepthChroma = m_tenBit ? 10 : 8;
+    hevcExtra.maxTemporalIdToDecode = -1;
+    hevcExtra.hdrFrameFormat = kHevcFrameFormatDefault;
+    hevcExtra.gpuLoadLevel = kHevcGpuLoadLevel3;
+    config.extraConfigInfo = &hevcExtra;
+  }
 
   // The default maximum level (HEVC 4.1 / H.264 5.1 at 1080p) covers most
   // files, but encodes tagged higher (e.g. 1080p HEVC at level 5.0/5.1) were
