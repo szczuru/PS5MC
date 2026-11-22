@@ -79,5 +79,31 @@ if ! "$nm_tool" -a "$out/ps4-kodi-cxx-startup-probe.elf" | grep -F '__tls_get_ad
   exit 1
 fi
 "$here/make-pkg.sh" "$out/ps4-kodi-cxx-startup-probe.elf" "$out" \
-  "Kodi C++ startup probe" PSMC00009 \
-  IV0000-PSMC00009_00-KODIPROBE0000000 01.00
+  "Kodi C++ startup probe" PSMC00008 \
+  IV0000-PSMC00008_00-KODIPROBE0000000 01.00
+
+echo "==> kompilacja emulowanego TLS probe..."
+clang++ --target=x86_64-pc-freebsd12-elf -std=c++17 -fPIC -funwind-tables \
+  -femulated-tls \
+  -fno-exceptions -fno-rtti -nostdinc++ \
+  -isysroot "$tc" -isystem "$tc/include" \
+  -c "$root/probe/cxx_startup.cpp" -o "$out/cxx-emulated-tls.o"
+compiler_rt="$(clang++ --target=x86_64-linux-gnu -rtlib=compiler-rt \
+  -print-libgcc-file-name)"
+if [ ! -f "$compiler_rt" ]; then
+  echo "ERROR: compiler-rt builtins archive not found: $compiler_rt" >&2
+  exit 1
+fi
+ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
+  -L"$tc/lib" \
+  "$out/cxx-emulated-tls.o" "$compiler_rt" \
+  -lc -lkernel -lm \
+  "$tc/lib/crt1.o" -o "$out/ps4-kodi-cxx-emulated-tls-probe.elf"
+if ! "$nm_tool" -a "$out/ps4-kodi-cxx-emulated-tls-probe.elf" | \
+    grep -F '__emutls_get_address' >/dev/null; then
+  echo "ERROR: emulated TLS probe does not contain __emutls_get_address" >&2
+  exit 1
+fi
+"$here/make-pkg.sh" "$out/ps4-kodi-cxx-emulated-tls-probe.elf" "$out" \
+  "Kodi emulated TLS probe" PSMC00007 \
+  IV0000-PSMC00007_00-KODIPROBE0000000 01.00

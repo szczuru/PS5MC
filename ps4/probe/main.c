@@ -82,17 +82,6 @@ __attribute__((constructor(101))) static void probe_early_constructor(void)
     ps4log("PROBE_EARLY_CONSTRUCTOR_REACHED");
 }
 
-static void ps4_exit(void)
-{
-    if (g_logfd >= 0) {
-        close(g_logfd);
-        g_logfd = -1;
-    }
-    sceSystemServiceLoadExec("exit", NULL);
-    for (;;)
-        sceKernelSleep(1);
-}
-
 /* ------------------------------------------------------------------ helpers */
 static void fill_solid(uint32_t *px, int w, int h, uint32_t color)
 {
@@ -468,7 +457,9 @@ int main(void)
     probe_pad();
     probe_piglet();
 
-    ps4log("DONE – wyślij cały /data/kodi/probe.log");
-    ps4_exit();
-    return 0;
+    ps4log("DONE – sonda pozostaje uruchomiona, aby zachować log i ekran");
+    /* Returning from main or requesting LoadExec("exit") can itself cause
+     * CE-34878-0 on homebrew firmware. Keep the process alive for inspection. */
+    for (;;)
+        sceKernelSleep(60);
 }

@@ -43,7 +43,7 @@ execute_process(
 # A sysroot-like prefix for libraries we cross-build ourselves (FFmpeg, ...).
 set(PS4_PREFIX "${OO_PS4_TOOLCHAIN}/ps4mc-prefix" CACHE PATH "install prefix of cross-built libs")
 
-set(_ps4_common "-nostdinc -fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_CLANG_RESOURCE_DIR}/include -isystem ${PS4_PREFIX}/include")
+set(_ps4_common "-nostdinc -fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${CMAKE_CURRENT_LIST_DIR}/compat/include -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_CLANG_RESOURCE_DIR}/include -isystem ${PS4_PREFIX}/include")
 # OpenOrbis' PS4 CRT does not initialize the executable's local-exec TLS
 # block. Route all TLS accesses through musl's __tls_get_addr instead.
 set(_ps4_tls_flags "-ftls-model=global-dynamic")

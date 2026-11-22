@@ -50,6 +50,9 @@ export NM="${NM:-nm}"
 
 # Include roots: toolchain + clang builtins (emmintrin.h etc.)
 INC_FLAGS=()
+# Put the PS4 pthread ABI overlay before the SDK's musl headers so every
+# dependency sees Sony's actual attribute object sizes.
+INC_FLAGS+=(-isystem "$ROOT/toolchain/compat/include")
 for d in \
   "$OO_PS4_TOOLCHAIN/include" \
   "$OO_PS4_TOOLCHAIN/target/include" \

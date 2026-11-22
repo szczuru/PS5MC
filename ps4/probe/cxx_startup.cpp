@@ -33,9 +33,12 @@ __attribute__((constructor(200))) static void CxxInitializer()
 extern "C" int main(int, char**)
 {
   Log("CXX_PROBE_MAIN_REACHED");
-  if (g_threadValue == 0x4b4f4449)
+  const int value = g_threadValue;
+  if (value == 0x4b4f4449)
     Log("CXX_PROBE_TLS_READ_OK");
   else
     Log("CXX_PROBE_TLS_READ_BAD");
-  return 0;
+  Log("CXX_PROBE_IDLE: process will remain alive for inspection");
+  for (;;)
+    (void)sleep(60);
 }

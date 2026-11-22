@@ -18,10 +18,13 @@ if [ -n "$payload" ]; then
   cp -a "$payload"/. "$stage"/
 fi
 
-# NOTE: --authinfo powoduje crash CE-34878-0 na PS4 FW 9.00 + GoldHEN.
-# PAID 0x3800000000000035 bez authinfo dziala stabilnie.
+# Piglet and flexible system memory require the homebrew authority metadata.
+# Without AUTH_INFO the title can crash before main and EGL may return
+# EGL_NO_DISPLAY; use the authority used by working Piglet ports.
+paid="0x3800000000000035"
+authinfo="000000000000000000000000001C004000FF000000000080000000000000000000000000000000000000008000400040000000000000008000000000000000080040FFFF000000F000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 "$bin/create-fself" -in="$elf" -out="$out/$(basename "$elf" .elf).oelf" \
-  --eboot "$stage/eboot.bin" --paid 0x3800000000000035
+  --eboot "$stage/eboot.bin" --paid "$paid" --authinfo "$authinfo"
 
 sfo="$stage/sce_sys/param.sfo"
 P="$bin/PkgTool.Core"
@@ -29,10 +32,11 @@ P="$bin/PkgTool.Core"
 "$P" sfo_setentry "$sfo" APP_TYPE            --type Integer --maxsize 4   --value 1
 "$P" sfo_setentry "$sfo" APP_VER             --type Utf8    --maxsize 8   --value "$ver"
 "$P" sfo_setentry "$sfo" ATTRIBUTE           --type Integer --maxsize 4   --value 0
-"$P" sfo_setentry "$sfo" CATEGORY            --type Utf8    --maxsize 4   --value 'gd'
+"$P" sfo_setentry "$sfo" CATEGORY            --type Utf8    --maxsize 4   --value 'gde'
+"$P" sfo_setentry "$sfo" FORMAT              --type Utf8    --maxsize 4   --value 'obs'
 "$P" sfo_setentry "$sfo" CONTENT_ID          --type Utf8    --maxsize 48  --value "$cid"
 "$P" sfo_setentry "$sfo" DOWNLOAD_DATA_SIZE  --type Integer --maxsize 4   --value 0
-"$P" sfo_setentry "$sfo" SYSTEM_VER          --type Integer --maxsize 4   --value 0
+"$P" sfo_setentry "$sfo" SYSTEM_VER          --type Integer --maxsize 4   --value 1020
 "$P" sfo_setentry "$sfo" TITLE               --type Utf8    --maxsize 128 --value "$title"
 "$P" sfo_setentry "$sfo" TITLE_ID            --type Utf8    --maxsize 12  --value "$tid"
 "$P" sfo_setentry "$sfo" VERSION             --type Utf8    --maxsize 8   --value "$ver"

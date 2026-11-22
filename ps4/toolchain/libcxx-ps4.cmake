@@ -28,7 +28,7 @@ execute_process(
   COMMAND_ERROR_IS_FATAL ANY)
 
 set(_ps4_sysroot_flags
-    "-nostdinc -fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_CLANG_RESOURCE_DIR}/include -isystem ${PS4_PREFIX}/include")
+    "-nostdinc -fPIC -funwind-tables -D_GNU_SOURCE -D__PS4__=1 -isysroot ${OO_PS4_TOOLCHAIN} -isystem ${CMAKE_CURRENT_LIST_DIR}/compat/include -isystem ${OO_PS4_TOOLCHAIN}/include -isystem ${PS4_CLANG_RESOURCE_DIR}/include -isystem ${PS4_PREFIX}/include")
 set(CMAKE_C_FLAGS_INIT "${_ps4_sysroot_flags}")
 set(CMAKE_CXX_FLAGS_INIT
     "${_ps4_sysroot_flags} -isystem ${CMAKE_CURRENT_LIST_DIR}/../build/llvm-project/libcxxabi/include -D_LIBCPP_DISABLE_AVAILABILITY -fexceptions -fcxx-exceptions")

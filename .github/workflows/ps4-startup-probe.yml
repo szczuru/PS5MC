@@ -7,6 +7,8 @@ on:
     paths:
       - 'ps4/probe/**'
       - 'ps4/scripts/build-probe.sh'
+      - 'ps4/scripts/make-pkg.sh'
+      - 'ps4/toolchain/compat/include/**'
       - '.github/workflows/ps4-startup-probe.yml'
 
 permissions:
@@ -27,7 +29,7 @@ jobs:
 
       - name: System tools
         run: |
-          packages=(clang lld-18 cmake ninja-build curl git python3)
+          packages=(clang libclang-rt-18-dev lld-18 cmake ninja-build curl git python3)
           missing=()
           for package in "${packages[@]}"; do
             dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
@@ -60,7 +62,13 @@ jobs:
         run: bash ps4/scripts/build-probe.sh "$GITHUB_WORKSPACE/dist/startup-probe"
 
       - name: Verify package
-        run: test "$(stat -c%s dist/startup-probe/*.pkg | head -1)" -gt 1000000
+        run: |
+          shopt -s nullglob
+          packages=(dist/startup-probe/*.pkg)
+          test "${#packages[@]}" -eq 3
+          for package in "${packages[@]}"; do
+            test "$(stat -c%s "$package")" -gt 1000000
+          done
 
       - uses: actions/upload-artifact@v4
         with:
