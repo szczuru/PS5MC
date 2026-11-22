@@ -297,7 +297,8 @@ int32_t CVideoDec2::LoadModule()
   };
 
   for (const char* dependency : {"libSceVdecCore.sprx", "libSceVdecSavc.sprx",
-                                 "libSceVdecSavc2.sprx", "libSceVdecwrap.sprx"})
+                                 "libSceVdecSavc2.sprx", "libSceVdecSdec.sprx",
+                                 "libSceVdecwrap.sprx"})
   {
     const int32_t result = loadSystemLibrary(dependency);
     if (result < 0)
