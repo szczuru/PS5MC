@@ -8,6 +8,7 @@
 #include "utils/log.h"
 
 #include <orbis/UserService.h>
+#include <orbis/Sysmodule.h>
 #include <orbis/SystemService.h>
 
 #include <cerrno>
@@ -60,6 +61,17 @@ bool CPlatformPS4::InitStageOne()
   {
     PS4BootLog("Failed to create writable HOME, errno=%d", errno);
     CLog::Log(LOGERROR, "PS4: could not create a writable HOME (errno {})", errno);
+    return false;
+  }
+
+  PS4BootLog("Loading internal UserService sysmodule");
+  const uint32_t userServiceModule =
+      sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_USER_SERVICE);
+  PS4BootLog("UserService sysmodule result: 0x%08x", userServiceModule);
+  if (userServiceModule != 0)
+  {
+    CLog::Log(LOGERROR, "PS4: cannot load UserService sysmodule: {:#x}",
+              userServiceModule);
     return false;
   }
 

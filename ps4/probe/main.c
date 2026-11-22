@@ -452,6 +452,17 @@ int main(void)
     ps4log("PS4MC Probe v12 " __DATE__ " " __TIME__);
     ps4log("Cel: naprawić czarny ekran (dźwięk już działa)");
 
+    ps4log("before loading internal UserService sysmodule");
+    uint32_t user_service_module =
+        sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_USER_SERVICE);
+    ps4log("after loading internal UserService sysmodule: 0x%x",
+           user_service_module);
+    if (user_service_module != 0) {
+        ps4log("UserService sysmodule load failed; skipping dependent probes");
+        for (;;)
+            sceKernelSleep(60);
+    }
+
     ps4log("before sceUserServiceInitialize");
     int user_service_result = sceUserServiceInitialize(NULL);
     ps4log("after sceUserServiceInitialize: 0x%x", user_service_result);
