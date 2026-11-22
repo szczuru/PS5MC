@@ -8,6 +8,7 @@ source "$here/env.sh"
 out="$(readlink -m "${1:-$root/../dist/libcxx-probe}")"
 prefix="$root/ps4/depends/prefix"
 tc="$OO_PS4_TOOLCHAIN"
+clang_resource="$(clang++ --target=x86_64-pc-freebsd12-elf -print-resource-dir)"
 compiler_rt="$(clang++ --target=x86_64-linux-gnu -rtlib=compiler-rt \
   -print-libgcc-file-name)"
 mkdir -p "$out"
@@ -24,11 +25,12 @@ fi
 
 clang++ --target=x86_64-pc-freebsd12-elf -std=c++17 -fPIC -funwind-tables \
   -femulated-tls -fexceptions -fcxx-exceptions -nostdinc++ \
+  -isystem "$prefix/include/c++/v1" \
   -isysroot "$tc" \
   -isystem "$root/ps4/toolchain/compat/include" \
   -isystem "$tc/include" \
+  -isystem "$clang_resource/include" \
   -isystem "$prefix/include" \
-  -isystem "$prefix/include/c++/v1" \
   -c "$root/ps4/probe/libcxx_startup.cpp" -o "$out/libcxx-startup.o"
 
 ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
