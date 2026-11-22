@@ -43,6 +43,42 @@ jobs:
           sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
           sudo ln -sf /usr/bin/clang-18 /usr/bin/clang || true
 
+      - name: libssl1.1 for PkgTool.Core
+        run: |
+          curl -fsSL -o /tmp/libssl1.1.deb \
+            http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+          sudo dpkg -i /tmp/libssl1.1.deb
+
+      - name: Cache OpenOrbis toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/OpenOrbis
+          key: openorbis-v0.5.4-llvm18
+
+      - name: Prepare scripts
+        run: chmod +x ps4/scripts/*.sh
+
+      - name: Fetch OpenOrbis toolchain
+        run: bash ps4/scripts/00-fetch-toolchain.sh
+
+      - name: Build startup diagnostic PKGs
+        run: bash ps4/scripts/build-probe.sh "$GITHUB_WORKSPACE/dist/startup-probe"
+
+      - name: Verify packages
+        run: |
+          shopt -s nullglob
+          packages=(dist/startup-probe/*.pkg)
+          test "${#packages[@]}" -eq 5
+          for package in "${packages[@]}"; do
+            test "$(stat -c%s "$package")" -gt 1000000
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps4-kodi-startup-probe
+          path: dist/startup-probe/*.pkg
+          if-no-files-found: error
+
   libcxx-startup-probe:
     name: libc++ iostream startup diagnostic
     runs-on: ubuntu-24.04
@@ -113,40 +149,4 @@ jobs:
         with:
           name: ps4-kodi-libcxx-startup-probe
           path: dist/libcxx-probe/*.pkg
-          if-no-files-found: error
-
-      - name: libssl1.1 for PkgTool.Core
-        run: |
-          curl -fsSL -o /tmp/libssl1.1.deb \
-            http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
-          sudo dpkg -i /tmp/libssl1.1.deb
-
-      - name: Cache OpenOrbis toolchain
-        uses: actions/cache@v4
-        with:
-          path: ~/OpenOrbis
-          key: openorbis-v0.5.4-llvm18
-
-      - name: Prepare scripts
-        run: chmod +x ps4/scripts/*.sh
-
-      - name: Fetch OpenOrbis toolchain
-        run: bash ps4/scripts/00-fetch-toolchain.sh
-
-      - name: Build diagnostic PKG
-        run: bash ps4/scripts/build-probe.sh "$GITHUB_WORKSPACE/dist/startup-probe"
-
-      - name: Verify package
-        run: |
-          shopt -s nullglob
-          packages=(dist/startup-probe/*.pkg)
-          test "${#packages[@]}" -eq 5
-          for package in "${packages[@]}"; do
-            test "$(stat -c%s "$package")" -gt 1000000
-          done
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ps4-kodi-startup-probe
-          path: dist/startup-probe/*.pkg
           if-no-files-found: error
