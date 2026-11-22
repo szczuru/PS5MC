@@ -95,6 +95,12 @@ jobs:
       - name: Fetch OpenOrbis toolchain
         run: bash ps4/scripts/00-fetch-toolchain.sh
 
+      - name: Stage OpenOrbis libc++ compatibility headers
+        run: |
+          mkdir -p ps4/depends/prefix/include
+          install -m 0644 ps4/toolchain/compat/xlocale.h ps4/depends/prefix/include/xlocale.h
+          install -m 0644 ps4/toolchain/compat/pthread_np.h ps4/depends/prefix/include/pthread_np.h
+
       - name: Build libc++ runtime
         env:
           PS4_BUILD_JOBS: 4
