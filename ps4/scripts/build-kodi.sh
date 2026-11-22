@@ -268,7 +268,7 @@ if ! "$nm_tool" -a "$build/kodi.elf" | grep -E '[[:space:]]T[[:space:]]+_init$' 
   exit 1
 fi
 if ! "$nm_tool" -a "$build/kodi.elf" | grep -F '__tls_get_addr' >/dev/null; then
-  echo "ERROR: kodi.elf does not contain the dynamic TLS resolver; check -ftls-model=general-dynamic" >&2
+  echo "ERROR: kodi.elf does not contain the dynamic TLS resolver; check -ftls-model=global-dynamic" >&2
   exit 1
 fi
 readelf_tool="$(command -v llvm-readelf || command -v readelf || true)"
