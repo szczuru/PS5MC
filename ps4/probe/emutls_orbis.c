@@ -1,5 +1,6 @@
 /* Minimal emulated TLS runtime backed directly by Orbis libkernel keys.
  * Keep this file compiled without -femulated-tls to avoid recursion. */
+#define _POSIX_C_SOURCE 200112L
 #include <orbis/libkernel.h>
 
 #include <stdint.h>
