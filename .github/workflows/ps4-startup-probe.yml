@@ -7,6 +7,9 @@ on:
     paths:
       - 'ps4/probe/**'
       - 'ps4/scripts/build-probe.sh'
+      - 'ps4/scripts/build-libcxx-probe.sh'
+      - 'ps4/scripts/build-libcxx.sh'
+      - 'ps4/toolchain/libcxx-ps4.cmake'
       - 'ps4/scripts/make-pkg.sh'
       - 'ps4/toolchain/compat/include/**'
       - '.github/workflows/ps4-startup-probe.yml'
@@ -39,6 +42,72 @@ jobs:
           fi
           sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
           sudo ln -sf /usr/bin/clang-18 /usr/bin/clang || true
+
+  libcxx-startup-probe:
+    name: libc++ iostream startup diagnostic
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ps4
+            .github
+          sparse-checkout-cone-mode: false
+
+      - name: System tools
+        run: |
+          packages=(clang clang-18 libclang-rt-18-dev lld-18 llvm-18 libc++-18-dev cmake ninja-build ccache curl git python3)
+          missing=()
+          for package in "${packages[@]}"; do
+            dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q 'install ok installed' || missing+=("$package")
+          done
+          if ((${#missing[@]})); then
+            sudo apt-get install -y -qq "${missing[@]}"
+          fi
+          sudo ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld || true
+
+      - name: libssl1.1 for PkgTool.Core
+        run: |
+          curl -fsSL -o /tmp/libssl1.1.deb \
+            http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+          sudo dpkg -i /tmp/libssl1.1.deb
+
+      - name: Cache OpenOrbis toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/OpenOrbis
+          key: openorbis-v0.5.4-llvm18
+
+      - name: Cache LLVM libc++ source and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ps4/build/llvm-project
+            ps4/build/libcxx
+          key: ps4-libcxx-18.1.3-openorbis-v0.5.4-${{ hashFiles('ps4/scripts/build-libcxx.sh', 'ps4/toolchain/libcxx-ps4.cmake') }}
+          restore-keys: |
+            ps4-libcxx-18.1.3-openorbis-v0.5.4-
+
+      - name: Prepare scripts
+        run: chmod +x ps4/scripts/*.sh
+
+      - name: Fetch OpenOrbis toolchain
+        run: bash ps4/scripts/00-fetch-toolchain.sh
+
+      - name: Build libc++ runtime
+        env:
+          PS4_BUILD_JOBS: 4
+        run: bash ps4/scripts/build-libcxx.sh
+
+      - name: Build libc++ startup diagnostic PKG
+        run: bash ps4/scripts/build-libcxx-probe.sh "$GITHUB_WORKSPACE/dist/libcxx-probe"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps4-kodi-libcxx-startup-probe
+          path: dist/libcxx-probe/*.pkg
+          if-no-files-found: error
 
       - name: libssl1.1 for PkgTool.Core
         run: |
