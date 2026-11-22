@@ -25,6 +25,10 @@ fi
 
 clang++ --target=x86_64-pc-freebsd12-elf -std=c++17 -fPIC -funwind-tables \
   -femulated-tls -fexceptions -fcxx-exceptions -nostdinc++ \
+  -D_GNU_SOURCE -D__PS4__=1 -D_REENTRANT -D_FILE_OFFSET_BITS=64 \
+  -D__STDC_CONSTANT_MACROS \
+  -D_LIBCPP_HAS_NO_VENDOR_AVAILABILITY_ANNOTATIONS \
+  -D_LIBCPP_DISABLE_AVAILABILITY -D_LIBCPP_DISABLE_EXTERN_TEMPLATE \
   -isystem "$prefix/include/c++/v1" \
   -isysroot "$tc" \
   -isystem "$root/ps4/toolchain/compat/include" \
