@@ -189,6 +189,13 @@ cp -a "$root/ps4/overlay/xbmc/platform/ps4" "$root/xbmc/platform/"
 cp -a "$root/ps4/overlay/xbmc/windowing/ps4" "$root/xbmc/windowing/"
 
 # OpenOrbis omits FreeBSD's DVD CSS ioctl header; use the matching FreeBSD 12 ABI shim.
+compiler_launcher_args=()
+if command -v ccache >/dev/null 2>&1; then
+  compiler_launcher_args+=(
+    -DCMAKE_C_COMPILER_LAUNCHER=ccache
+    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+  )
+fi
 cmake -S "$root" -B "$build" -U "Python3_*" -U "PYTHON_*" -G Ninja \
   -DCMAKE_TOOLCHAIN_FILE="$root/ps4/toolchain/ps4-kodi.cmake" \
   -DCMAKE_BUILD_TYPE=Release \
@@ -223,7 +230,8 @@ cmake -S "$root" -B "$build" -U "Python3_*" -U "PYTHON_*" -G Ninja \
   -DENABLE_INTERNAL_FSTRCMP=ON \
   -DENABLE_INTERNAL_TINYXML2=ON \
   -DWITH_TEXTUREPACKER="$host_tools/TexturePacker" \
-  -DUSE_INTERNAL_LIBS=ON
+  -DUSE_INTERNAL_LIBS=ON \
+  "${compiler_launcher_args[@]}"
 
 # Kodi builds host flatc and the target library from the same archive. Seed
 # the shared download cache first so parallel ExternalProject steps cannot
