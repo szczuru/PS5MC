@@ -238,6 +238,8 @@ jobs:
           # between Actions runs so fixes rebuild only affected files.
           ccache --max-size=5G
           bash ps4/scripts/build-kodi.sh "$GITHUB_WORKSPACE/dist/kodi"
+      - name: Build exact Kodi import smoke-test PKG
+        run: bash ps4/scripts/build-import-probe.sh ps4/build/kodi/kodi.elf "$GITHUB_WORKSPACE/dist/import-probe"
       - name: Statystyki ccache
         if: always()
         run: ccache --show-stats || true
@@ -251,4 +253,9 @@ jobs:
         with:
           name: ps4mc-kodi-pkg
           path: dist/kodi/*.pkg
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps4-kodi-import-probe
+          path: dist/import-probe/*.pkg
           if-no-files-found: error
