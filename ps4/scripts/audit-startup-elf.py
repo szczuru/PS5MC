@@ -30,6 +30,7 @@ def create_report() -> None:
     headers = run(readelf_tool, "-W", "-l", str(elf_path))
     sections = run(readelf_tool, "-W", "-S", str(elf_path))
     relocations = run(readelf_tool, "-W", "-r", str(elf_path))
+    elf_symbols = run(readelf_tool, "-W", "-s", str(elf_path))
     symbols = run(nm_tool, "-a", "-n", "-C", str(elf_path))
     imports = run(nm_tool, "-D", "--undefined-only", "--format=posix", str(elf_path))
 
@@ -97,6 +98,19 @@ def create_report() -> None:
         for line in imports.splitlines()
         if len(line.split()) >= 2 and line.split()[1] == "U"
     ]
+    tls_program_headers = [
+        line.strip() for line in headers.splitlines() if line.lstrip().startswith("TLS ")
+    ]
+    tls_sections = [
+        line.strip()
+        for line in sections.splitlines()
+        if any(name in line for name in (".tdata", ".tbss"))
+    ]
+    tls_symbols = []
+    for line in elf_symbols.splitlines():
+        fields = line.split()
+        if len(fields) >= 8 and fields[3] == "TLS":
+            tls_symbols.append(" ".join(fields[1:4] + [fields[-1]]))
     native_tls_reference = any(
         len(fields := line.split()) >= 2 and fields[-2] == "U" and "__tls_get_addr" in fields[-1]
         for line in symbols.splitlines()
@@ -109,6 +123,12 @@ def create_report() -> None:
         f"PS4EarlyBootLog: {logger_address:#x}" if logger_address is not None else "PS4EarlyBootLog: missing",
         f"PS4EarlyBootLog constructor index: {logger_indices[0]}" if logger_indices else "PS4EarlyBootLog is not in DT_INIT_ARRAY",
         f"native PT_TLS segment: {'yes' if any(line.lstrip().startswith('TLS ') for line in headers.splitlines()) else 'no'}",
+        "PT_TLS program header:",
+        *(f"  {line}" for line in tls_program_headers),
+        "TLS data sections:",
+        *(f"  {line}" for line in tls_sections),
+        f"TLS symbol count: {len(tls_symbols)}",
+        *(f"  {symbol}" for symbol in tls_symbols[:80]),
         f"strong undefined dynamic imports: {len(set(dynamic_imports))}",
         f"__tls_get_addr reference: {'yes' if native_tls_reference else 'no'}",
         "First 64 constructor targets:",
