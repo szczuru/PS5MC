@@ -81,6 +81,10 @@ while IFS= read -r dependency; do
   }
 done < <(sed -n 's/.*Shared library: \[\([^]]*\)\].*/\1/p' <<<"$kodi_dynamic")
 
+python3 "$here/audit-startup-elf.py" "$out/ps4-kodi-import-probe.elf" \
+  "$out/import-probe-startup-audit.txt" "$nm_tool" "$readelf_tool" || \
+  echo "WARNING: could not create the import-probe ELF audit"
+
 "$here/make-pkg.sh" "$out/ps4-kodi-import-probe.elf" "$out" \
   "Kodi import loader probe" PSMC00013 \
   IV0000-PSMC00013_00-KODIPROBE0000000 01.00
