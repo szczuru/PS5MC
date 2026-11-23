@@ -12,8 +12,9 @@ mkdir -p "$out"
 
 nm_tool="$(command -v llvm-nm || command -v llvm-nm-18 || command -v nm || true)"
 readelf_tool="$(command -v llvm-readelf || command -v llvm-readelf-18 || command -v readelf || true)"
-if [ -z "$nm_tool" ] || [ -z "$readelf_tool" ]; then
-  echo "ERROR: nm and readelf are required to build the Kodi import probe" >&2
+linker="$(command -v ld.lld || command -v ld.lld-18 || true)"
+if [ -z "$nm_tool" ] || [ -z "$readelf_tool" ] || [ -z "$linker" ]; then
+  echo "ERROR: nm, readelf, and lld are required to build the Kodi import probe" >&2
   exit 1
 fi
 
@@ -62,7 +63,7 @@ PY
 clang --target=x86_64-pc-freebsd12-elf -std=c11 -fPIC -funwind-tables \
   -D_GNU_SOURCE -D__PS4__=1 -isysroot "$tc" -isystem "$tc/include" \
   -c "$out/kodi-imports.generated.c" -o "$out/kodi-imports.o"
-ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
+"$linker" -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
   -L"$tc/lib" \
   "$out/kodi-imports.o" \
   -lc -lm -lkernel \
