@@ -12,8 +12,11 @@ def run(*command: str) -> str:
 
 
 def dynamic_value(output: str, tag: str) -> int | None:
-    match = re.search(rf"\({re.escape(tag)}\)\s+(0x[0-9a-fA-F]+)", output)
-    return int(match.group(1), 16) if match else None
+    match = re.search(rf"\({re.escape(tag)}\)\s+(0x[0-9a-fA-F]+|[0-9]+)", output)
+    if not match:
+        return None
+    value = match.group(1)
+    return int(value, 16) if value.startswith("0x") else int(value, 10)
 
 
 def parse_hex(value: str) -> int:
