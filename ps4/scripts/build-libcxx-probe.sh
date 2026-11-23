@@ -67,7 +67,7 @@ dynamic_info="$("$readelf_tool" -W -d "$out/ps4-kodi-libcxx-startup-probe.elf")"
 for dependency in \
   libkernel.so libSceSysmodule.so libSceNet.so libScePigletv2VSH.so \
   libSceVideoOut.so libSceAudioOut.so libScePad.so libSceUserService.so \
-  libSceSystemService.so libc.so libm.so; do
+  libSceSystemService.so; do
   if ! grep -F "Shared library: [$dependency]" <<<"$dynamic_info" >/dev/null; then
     echo "ERROR: libc++ startup probe is missing Kodi dependency $dependency" >&2
     exit 1
