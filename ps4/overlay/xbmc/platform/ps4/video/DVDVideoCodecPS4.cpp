@@ -137,8 +137,20 @@ bool CDVDVideoCodecPS4::Open(CDVDStreamInfo& hints, CDVDCodecOptions& options)
            (hints.profile == AV_PROFILE_HEVC_MAIN_10 ||
             (hints.profile == AV_PROFILE_UNKNOWN && hints.bitsperpixel == 10)))
     codec = VideoDec2Codec::HEVCMain10;
+  else if (hints.codec == AV_CODEC_ID_VP9 && hints.profile == AV_PROFILE_VP9_0 &&
+           (hints.bitsperpixel == 0 || hints.bitsperpixel <= 8))
+    codec = VideoDec2Codec::VP9;
+  else if (hints.codec == AV_CODEC_ID_VP9 && hints.profile == AV_PROFILE_VP9_2 &&
+           (hints.bitsperpixel == 0 || hints.bitsperpixel <= 10))
+    codec = VideoDec2Codec::VP9Profile2;
   else
-    return false; // FFmpeg takes unsupported profiles, VP9, AV1, 4:2:2/4:4:4, 12-bit, ...
+    return false; // FFmpeg takes unsupported profiles, AV1, 4:2:2/4:4:4, 12-bit, ...
+
+  m_vp9 = codec == VideoDec2Codec::VP9 || codec == VideoDec2Codec::VP9Profile2;
+  m_tenBit = codec == VideoDec2Codec::HEVCMain10 || codec == VideoDec2Codec::VP9Profile2 ||
+             codec == VideoDec2Codec::H264High10;
+  m_hevc = codec == VideoDec2Codec::HEVC || codec == VideoDec2Codec::HEVCMain10;
+  m_skipRasl = m_hevc;
 
   if (hints.width <= 0 || hints.height <= 0 || hints.width > 3840 || hints.height > 2176)
     return false;
@@ -223,11 +235,6 @@ bool CDVDVideoCodecPS4::Open(CDVDStreamInfo& hints, CDVDCodecOptions& options)
   m_fullRange = hints.colorRange == AVCOL_RANGE_JPEG;
   m_stereoMode = hints.stereo_mode;
 
-  m_vp9 = codec == VideoDec2Codec::VP9 || codec == VideoDec2Codec::VP9Profile2;
-  m_tenBit = codec == VideoDec2Codec::HEVCMain10 || codec == VideoDec2Codec::VP9Profile2 ||
-             codec == VideoDec2Codec::H264High10;
-  m_hevc = codec == VideoDec2Codec::HEVC || codec == VideoDec2Codec::HEVCMain10;
-  m_skipRasl = m_hevc;
   m_alignmentKnown = !m_tenBit;
   m_alignmentSamples = 0;
   // 10-bit: lower-aligned until a picture shows otherwise (DetectAlignment)
