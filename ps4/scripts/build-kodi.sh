@@ -287,6 +287,10 @@ if ! "$readelf_tool" -W -d "$build/kodi.elf" | grep -E '\(INIT_ARRAY\)' >/dev/nu
 fi
 echo "Verified main, early boot logger, emulated TLS runtime, and constructor array"
 
+python3 "$here/audit-startup-elf.py" "$build/kodi.elf" \
+  "$out/kodi-startup-elf-audit.txt" "$nm_tool" "$readelf_tool" || \
+  echo "WARNING: could not create the optional Kodi startup ELF audit"
+
 rm -rf "$stage"
 DESTDIR="$stage" cmake --install "$build"
 mkdir -p "$stage/app0/lib/python3.14"
