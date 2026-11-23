@@ -43,6 +43,7 @@ ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
   -lc++ -lc++abi -lunwind "$compiler_rt" \
   -lSceVideoOut -lSceAudioOut -lScePad -lSceUserService \
   -lSceSystemService -lSceSysmodule -lScePigletv2VSH \
+  --no-as-needed -lSceNet --as-needed \
   -lkernel -lc -lm "$tc/lib/crt1.o" \
   -o "$out/ps4-kodi-libcxx-startup-probe.elf"
 
@@ -60,6 +61,11 @@ fi
 if ! "$readelf_tool" -W -d "$out/ps4-kodi-libcxx-startup-probe.elf" | \
   grep -E '\(INIT_ARRAY\)' >/dev/null; then
   echo "ERROR: libc++ startup probe has no constructor array" >&2
+  exit 1
+fi
+if ! "$readelf_tool" -W -d "$out/ps4-kodi-libcxx-startup-probe.elf" | \
+  grep -F 'Shared library: [libSceNet.so]' >/dev/null; then
+  echo "ERROR: libc++ startup probe does not retain Kodi's libSceNet dependency" >&2
   exit 1
 fi
 
