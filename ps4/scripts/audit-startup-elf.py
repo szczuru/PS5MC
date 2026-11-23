@@ -20,7 +20,7 @@ def parse_hex(value: str) -> int:
     return int(value.removeprefix("0x"), 16)
 
 
-def main() -> None:
+def create_report() -> None:
     elf, report_path, nm_tool, readelf_tool = sys.argv[1:]
     elf_path = Path(elf)
     dynamic = run(readelf_tool, "-W", "-d", str(elf_path))
@@ -117,6 +117,20 @@ def main() -> None:
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"Wrote Kodi ELF startup report: {output}")
     print("\n".join(lines[:9]))
+
+
+def main() -> None:
+    report_path = Path(sys.argv[2])
+    try:
+        create_report()
+    except BaseException as error:
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        detail = getattr(error, "stderr", None)
+        message = f"Startup ELF audit failed: {type(error).__name__}: {error}\n"
+        if detail:
+            message += detail if isinstance(detail, str) else detail.decode(errors="replace")
+        report_path.write_text(message, encoding="utf-8")
+        print(message, file=sys.stderr)
 
 
 if __name__ == "__main__":
