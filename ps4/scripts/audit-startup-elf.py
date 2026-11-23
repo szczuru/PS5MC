@@ -33,7 +33,10 @@ def create_report() -> None:
     init_address = dynamic_value(dynamic, "INIT_ARRAY")
     init_size = dynamic_value(dynamic, "INIT_ARRAYSZ")
     if init_address is None or init_size is None or init_size % 8:
-        raise SystemExit("kodi.elf has no usable DT_INIT_ARRAY/DT_INIT_ARRAYSZ")
+        tag_lines = "\n".join(line for line in dynamic.splitlines() if "INIT_ARRAY" in line)
+        raise SystemExit(
+            f"unusable DT_INIT_ARRAY tags (address={init_address}, size={init_size})\n{tag_lines}"
+        )
 
     section_offset = None
     for line in sections.splitlines():
