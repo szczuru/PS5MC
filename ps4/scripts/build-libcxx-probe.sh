@@ -41,10 +41,10 @@ ld.lld -m elf_x86_64 -pie --script "$tc/link.x" --eh-frame-hdr \
   -L"$prefix/lib" -L"$tc/lib" \
   "$out/libcxx-startup.o" \
   -lc++ -lc++abi -lunwind "$compiler_rt" \
+  --no-as-needed \
   -lSceVideoOut -lSceAudioOut -lScePad -lSceUserService \
   -lSceSystemService -lSceSysmodule -lScePigletv2VSH \
-  --no-as-needed -lSceNet --as-needed \
-  -lkernel -lc -lm "$tc/lib/crt1.o" \
+  -lSceNet -lkernel -lc -lm --as-needed "$tc/lib/crt1.o" \
   -o "$out/ps4-kodi-libcxx-startup-probe.elf"
 
 nm_tool="$(command -v llvm-nm || command -v llvm-nm-18 || command -v nm || true)"
@@ -63,11 +63,16 @@ if ! "$readelf_tool" -W -d "$out/ps4-kodi-libcxx-startup-probe.elf" | \
   echo "ERROR: libc++ startup probe has no constructor array" >&2
   exit 1
 fi
-if ! "$readelf_tool" -W -d "$out/ps4-kodi-libcxx-startup-probe.elf" | \
-  grep -F 'Shared library: [libSceNet.so]' >/dev/null; then
-  echo "ERROR: libc++ startup probe does not retain Kodi's libSceNet dependency" >&2
-  exit 1
-fi
+dynamic_info="$("$readelf_tool" -W -d "$out/ps4-kodi-libcxx-startup-probe.elf")"
+for dependency in \
+  libkernel.so libSceSysmodule.so libSceNet.so libScePigletv2VSH.so \
+  libSceVideoOut.so libSceAudioOut.so libScePad.so libSceUserService.so \
+  libSceSystemService.so libc.so libm.so; do
+  if ! grep -F "Shared library: [$dependency]" <<<"$dynamic_info" >/dev/null; then
+    echo "ERROR: libc++ startup probe is missing Kodi dependency $dependency" >&2
+    exit 1
+  fi
+done
 
 "$here/make-pkg.sh" "$out/ps4-kodi-libcxx-startup-probe.elf" "$out" \
   "Kodi libc++ startup probe" PSMC00011 \
